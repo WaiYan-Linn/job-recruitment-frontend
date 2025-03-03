@@ -30,7 +30,7 @@ export default function SigninPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br  from-gray-200 via-indigo-500 to-blue-400">
+    <div className="flex min-h-screen items-center justify-center dark:from-gray-800 dark:to-gray-900 bg-gradient-to-br  from-gray-200 via-indigo-500 to-blue-400  ">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           {/* Replace with your logo */}
@@ -46,12 +46,12 @@ export default function SigninPage() {
         </div>
         <form
           onSubmit={handleSubmit(signIn)}
-          className="bg-white py-8 px-6 shadow rounded-lg space-y-6"
+          className="bg-white dark:bg-gray-700 py-8 px-6 shadow rounded-lg space-y-6"
         >
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Email address
             </label>
@@ -61,7 +61,7 @@ export default function SigninPage() {
                 id="email"
                 {...register("email", { required: "Email is required" })}
                 placeholder="you@example.com"
-                className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-600 text-gray-800 dark:text-gray-100"
               />
             </div>
             {errors.email && (
@@ -74,7 +74,7 @@ export default function SigninPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Password
             </label>
@@ -94,7 +94,7 @@ export default function SigninPage() {
                   },
                 })}
                 placeholder="••••••••"
-                className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-600 text-gray-800 dark:text-gray-100"
               />
             </div>
             {errors.password && (
@@ -114,7 +114,7 @@ export default function SigninPage() {
               />
               <label
                 htmlFor="remember_me"
-                className="ml-2 block text-sm text-gray-900"
+                className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
               >
                 Remember me
               </label>
@@ -122,7 +122,7 @@ export default function SigninPage() {
             <div className="text-sm">
               <a
                 href="#"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-gray-700 dark:text-gray-300  hover:text-indigo-500"
               >
                 Forgot your password?
               </a>
@@ -142,11 +142,11 @@ export default function SigninPage() {
             </button>
           </div>
 
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-gray-700 dark:text-gray-300">
             Don't have an account?{" "}
             <a
-              href="/signup"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              href="/anonymous/signup"
+              className="font-medium text-purple-700 dark:text-gray-300 hover:text-indigo-500"
             >
               Sign up
             </a>

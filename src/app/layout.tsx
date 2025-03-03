@@ -1,24 +1,33 @@
 // app/layout.tsx
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import "@/app/globals.css"; // Import Tailwind styles
-import { ConditionalFooter } from "@/app/ConditionalFooter";
+import "@/app/globals.css";
 import { AuthProvider } from "@/model/providers/AuthContext";
+import { ThemeProvider } from "next-themes";
+import { Header } from "@/components/layout/Header";
+import { ConditionalFooter } from "@/app/ConditionalFooter";
+import { ClientOnly } from "@/components/shared/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head />
       <body className="min-h-screen bg-background font-sans antialiased">
-        <div className="relative flex min-h-screen flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+        >
           <AuthProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <ConditionalFooter />
+            <ClientOnly>
+              <Header />
+              <main className="flex-1">{children}</main>
+              <ConditionalFooter />
+            </ClientOnly>
           </AuthProvider>
-        </div>
+        </ThemeProvider>
       </body>
     </html>
   );

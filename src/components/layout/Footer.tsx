@@ -4,7 +4,7 @@ import Link from "next/link"; // components/layout/Footer.tsx
 export const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-400">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto pl-16 pr-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 py-16">
           <div>
             <h3 className="text-2xl font-bold text-white mb-4">CareerHub</h3>

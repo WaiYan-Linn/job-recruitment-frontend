@@ -1,48 +1,43 @@
 "use client";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { useState } from "react";
 import {
   accountRegister,
   accountSignup,
 } from "../../../model/clients/signup-client"; // Adjust the path accordingly
-import { useState } from "react";
 
 export default function SignupPage() {
   const router = useRouter();
-
   const [form, setForm] = useState({
     name: "",
     phone: "",
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const [loading, setLoading] = useState(false); // Loading state
-
   const handleSignup = async () => {
-    setLoading(true); // Start loading
-
+    setLoading(true);
     try {
-      await accountRegister(form); // Call API after navigation
-
-      sessionStorage.setItem("signupData", JSON.stringify(form)); // Store data first
-
-      router.push("/anonymous/signup/otp-verification"); // Navigate immediately
+      await accountRegister(form);
+      sessionStorage.setItem("signupData", JSON.stringify(form));
+      router.push("/anonymous/signup/otp-verification");
     } catch (error) {
       console.error("Signup failed:", error);
-      sessionStorage.removeItem("signupData"); // Remove invalid data if request fails
+      sessionStorage.removeItem("signupData");
     } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-gray-200 via-indigo-500 to-blue-400">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-96">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 bg-gradient-to-t from-blue-400 to-indigo-500 text-transparent bg-clip-text">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-gray-800 dark:to-gray-900">
+      <div className="bg-white mt-12 dark:bg-gray-700 p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-200">
           Create Account
         </h2>
         <input
@@ -51,16 +46,15 @@ export default function SignupPage() {
           value={form.name}
           onChange={handleChange}
           placeholder="Full Name"
-          className="w-full text-gray-900 dark:text-gray-200 px-4 py-2 border rounded-lg mb-3 focus:ring-2 focus:ring-blue-400"
+          className="w-full px-4 py-3 mb-4 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         />
-
         <input
           type="tel"
           name="phone"
           value={form.phone}
           onChange={handleChange}
           placeholder="Phone Number"
-          className="w-full text-gray-900 dark:text-gray-200 px-4 py-2 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-400"
+          className="w-full px-4 py-3 mb-4 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         />
         <input
           type="email"
@@ -68,7 +62,7 @@ export default function SignupPage() {
           value={form.email}
           onChange={handleChange}
           placeholder="Email"
-          className="w-full px-4 py-2 text-gray-900 dark:text-gray-200 border rounded-lg mb-3 focus:ring-2 focus:ring-blue-400"
+          className="w-full px-4 py-3 mb-4 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         />
         <input
           type="password"
@@ -76,12 +70,12 @@ export default function SignupPage() {
           value={form.password}
           onChange={handleChange}
           placeholder="Password"
-          className="w-full px-4 text-gray-900 dark:text-gray-200  py-2 border rounded-lg mb-3 focus:ring-2 focus:ring-blue-400"
+          className="w-full px-4 py-3 mb-6 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
         />
-
         <button
           onClick={handleSignup}
-          className={`w-full py-2 rounded-lg font-semibold transition duration-300 ${
+          disabled={loading}
+          className={`w-full py-3 rounded-md font-semibold transition duration-300 ${
             loading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700 text-white"
@@ -89,9 +83,9 @@ export default function SignupPage() {
         >
           {loading ? "Signing up..." : "Sign Up"}
         </button>
-        <p className="text-sm text-center text-gray-600 mt-4">
+        <p className="text-sm text-center mt-4 text-gray-700 dark:text-gray-300">
           Already have an account?{" "}
-          <a href="/anonymous/signin" className="text-blue-500 hover:underline">
+          <a href="/anonymous/signin" className="text-blue-600 hover:underline">
             Login
           </a>
         </p>

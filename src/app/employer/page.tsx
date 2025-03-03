@@ -16,6 +16,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import custom from "@/lib/front-view-business-people-talking.jpg";
+import { useRouter } from "next/navigation";
 
 const EmployerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -113,6 +114,11 @@ const EmployerDashboard = () => {
     },
   ];
 
+  const router = useRouter();
+  const handleRouting = () => {
+    router.push("/employer/jobposting");
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "New":
@@ -134,30 +140,31 @@ const EmployerDashboard = () => {
 
   return (
     <div
-      className="pt-20 pb-16 bg-gray-50 dark:bg-gray-800 bg-cover bg-center bg-no-repeat min-h-screen"
+      className="relative pt-20 pb-16 min-h-screen bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `url(${custom.src})`,
-        // backgroundImage:
-        // "url('https://img.freepik.com/free-photo/businesspeople-meeting-office-working_23-2148908920.jpg?t=st=1739979759~exp=1739983359~hmac=d1f5585d4ecc593f88039cc882890c49e2b3f74b7dbc1c4463540900196edc0f&w=996')",
-        // backgroundImage:
-        //   "url('https://www.risefor-career.com/images/top/RISEforCarrer_A001_TOP.png')",
-        filter: "brightness(0.7)",
+        backgroundImage: `url(
+        'https://images.unsplash.com/photo-1481026469463-66327c86e544?q=80&w=2108&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' )`,
       }}
     >
-      <div className="max-w-6xl mx-auto px-6">
+      {/* Background overlay for readability */}
+      <div className="absolute inset-0 bg-black opacity-10"></div>
+      <div className="relative max-w-6xl mx-auto px-6">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold  bg-gradient-to-r  from-blue-500 via-purple-500 to-cyan-700  text-transparent bg-clip-text text-gray-900 dark:text-white">
-              Employer Dashboard
+            <h1 className="relative inline-block text-4xl font-extrabold dark:to-gray-700 dark:form-dark  bg-gradient-to-r  from-zinc-800 via-blue-800 to-gray-800  text-transparent bg-clip-text mb-2">
+              Dashboard
             </h1>
-            <p className="text-gray-600  bg-gradient-to-r  from-gray-800 to-black mt-2 text-transparent bg-clip-text dark:text-gray-400">
+            <p className="text-gray-600 bg-gradient-to-r from-gray-800 to-black mt-2 text-transparent bg-clip-text dark:text-gray-900">
               Manage your job listings and applicants
             </p>
           </div>
 
           <div className="mt-4 md:mt-0 flex space-x-3">
-            <button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+            <button
+              onClick={handleRouting}
+              className="flex items-center dark:bg-indigo-600 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition shadow"
+            >
               <Plus size={18} className="mr-2" />
               Post New Job
             </button>
@@ -221,16 +228,6 @@ const EmployerDashboard = () => {
                 }`}
               >
                 Applications
-              </button>
-              <button
-                onClick={() => setActiveTab("analytics")}
-                className={`px-4 py-3 text-sm font-medium ${
-                  activeTab === "analytics"
-                    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
-              >
-                Analytics
               </button>
             </nav>
           </div>
@@ -400,7 +397,7 @@ const EmployerDashboard = () => {
                       <Filter size={16} className="mr-2" />
                       Filter
                     </button>
-                    <button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                    <button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition shadow">
                       <Plus size={16} className="mr-2" />
                       Add New
                     </button>
@@ -655,49 +652,6 @@ const EmployerDashboard = () => {
                           ))}
                       </tbody>
                     </table>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "analytics" && (
-              <div>
-                <div className="mb-8 text-center">
-                  <AlertCircle
-                    size={48}
-                    className="mx-auto text-blue-600 dark:text-blue-400 mb-4"
-                  />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    Analytics Coming Soon
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    We're working on building comprehensive analytics for your
-                    job listings and application metrics. This feature will be
-                    available soon!
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-900">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                      Job Performance Overview
-                    </h3>
-                    <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Chart loading soon...
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-900">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                      Applicant Sources
-                    </h3>
-                    <div className="h-48 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Chart loading soon...
-                      </p>
-                    </div>
                   </div>
                 </div>
               </div>

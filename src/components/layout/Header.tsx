@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import {
   Briefcase,
   Building,
@@ -21,33 +22,18 @@ export const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { authentication, signOut } = useAuth();
-  const [darkMode, setDarkMode] = useState<boolean | null>(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   // Instead of directly signing up, show the register modal.
   const handleRegister = () => {
     setShowRegisterModal(true);
   };
+  const { theme, setTheme } = useTheme();
 
-  useEffect(() => {
-    const theme = localStorage.getItem("theme");
-    setDarkMode(theme === "dark");
-  }, []);
-
-  useEffect(() => {
-    if (darkMode === null) return;
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
-
-  if (darkMode === null) {
-    return null;
-  }
+  if (!theme) return null; // wait until theme is loaded
+  const toggleDarkMode = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   const handleSignIn = () => router.push("/anonymous/signup");
   const isAuthPage =
@@ -145,10 +131,43 @@ export const Header = () => {
 
             {/* Dark Mode Toggle */}
             <button
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => toggleDarkMode()}
               className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
             >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              {theme === "dark" ? (
+                // Sun icon for light mode
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-sun text-gray-800"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                </svg>
+              ) : (
+                // Moon icon for dark mode
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-moon text-gray-700"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
