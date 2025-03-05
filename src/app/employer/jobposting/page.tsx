@@ -205,7 +205,7 @@ export default function PostJobPage() {
         {!formSubmitted && (
           <>
             <div className="mb-4 text-center">
-              <h1 className="relative inline-block text-4xl font-extrabold dark:text-gray-300 text-gray-900  bg-gradient-to-r  from-zinc-800 via-blue-800 to-gray-800  text-transparent bg-clip-text mb-2">
+              <h1 className="relative inline-block text-4xl font-extrabold dark:text-gray-900 text-gray-900  bg-gradient-to-r  from-zinc-800 via-blue-800 to-gray-800  text-transparent bg-clip-text mb-2">
                 Post a New Job
               </h1>
               <p className="text-lg italic  text-gray-900  bg-gradient-to-r  from-black via-blue-950 to-gray-800  text-transparent bg-clip-text  ">

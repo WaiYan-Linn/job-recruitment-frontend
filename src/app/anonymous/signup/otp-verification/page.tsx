@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { accountRegister, accountSignup } from "@/model/clients/signup-client"; // Adjust the path accordingly
 import axios from "axios";
 import { useAuthentication } from "@/model/stores/authentication-store";
+import { useAccessToken } from "@/model/stores/use-accessToken";
 
 export default function OTPVerificationPage() {
   const router = useRouter();
@@ -25,12 +26,27 @@ export default function OTPVerificationPage() {
     setLoading(true); // Start loading
 
     try {
-      // Call the signup function with the stored data and OTP as code
-      const accountInfo = await accountSignup(signupData, otp);
-      console.log("Signup success:", accountInfo);
-      useAuthentication.getState().setAuthentication(accountInfo);
+      const result = await accountSignup(signupData, otp);
+      console.log("Signup success:", result);
 
-      router.push("/"); // Redirect to success page
+      // Update access token in memory
+      const { setAccessToken } = useAccessToken.getState();
+      setAccessToken(result.accessToken);
+
+      // Prepare data for cookie storage
+      const { accessToken, ...cookieData } = result;
+
+      // Update authentication details in cookies
+      const { setAuthentication } = useAuthentication.getState();
+      setAuthentication(cookieData);
+
+      if (result.role === "JOBSEEKER") {
+        router.push("/jobseeker");
+      } else if (result.role === "EMPLOYER") {
+        router.push("/employer");
+      } else {
+        router.push("/admin");
+      } // Redirect to success page
 
       // Handle the success response (e.g., store token or redirect)
     } catch (err) {
@@ -42,11 +58,11 @@ export default function OTPVerificationPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-gray-200 to-blue-400">
-      <div className="bg-white p-24 rounded-2xl shadow-2xl w-96">
+      <div className="bg-white p-24 dark:bg-gray-300 rounded-2xl shadow-2xl w-96">
         <h2 className="text-2xl font-bold mb-12 text-center text-gray-800">
           OTP Verification
         </h2>
-        <p className="text-center text-gray-600 mb-4">
+        <p className="text-center text-gray-600  mb-4">
           Enter the OTP sent to your Gmail.
         </p>
         <input
@@ -54,7 +70,7 @@ export default function OTPVerificationPage() {
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
           placeholder="Enter OTP"
-          className="w-full px-3 pl-1 py-2 border rounded-lg mb-3 focus:ring-2 focus:ring-blue-400 text-center"
+          className="w-full px-3 pl-1 py-2 dark:bg-gray-200 dark:text-gray-600 border rounded-lg mb-3 focus:ring-2 focus:ring-blue-400 text-center"
         />
         {error && <p className="text-red-500 text-center mb-3">{error}</p>}
         <button

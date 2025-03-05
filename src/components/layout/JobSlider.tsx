@@ -55,7 +55,7 @@ const JobSlider = () => {
                 </div>
                 <div className="flex items-center text-white/90">
                   <MapPin className="w-4 h-4 mr-2" />
-                  <span>Shibuya, Tokyo</span>
+                  <span>Kamaryut, Yangon</span>
                 </div>
                 <div className="flex items-center text-white/90">
                   <Clock className="w-4 h-4 mr-2" />
@@ -117,7 +117,7 @@ const JobSlider = () => {
                 </div>
                 <div className="flex items-center text-white/90">
                   <MapPin className="w-4 h-4 mr-2" />
-                  <span>Osaka, Japan</span>
+                  <span>Sanchaung, Yangon</span>
                 </div>
                 <div className="flex items-center text-white/90">
                   <Clock className="w-4 h-4 mr-2" />

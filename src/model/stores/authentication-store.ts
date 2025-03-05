@@ -1,13 +1,14 @@
 import { create } from "zustand";
-import { AccountInfo } from "../domains/anonymous.domain";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { cookieStorage } from "./cookie-store";
+import { AccountInfo, StoreInCookies } from "../domains/anonymous.domain";
 
 type AuthenticationState = {
-  authentication?: AccountInfo;
+  authentication?: StoreInCookies;
 };
 
 type AuthenticationAction = {
-  setAuthentication: (authentication?: AccountInfo) => void;
+  setAuthentication: (authentication?: StoreInCookies) => void;
 };
 
 export const useAuthentication = create(
@@ -20,7 +21,7 @@ export const useAuthentication = create(
     }),
     {
       name: "job.recruit",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => cookieStorage),
     }
   )
 );

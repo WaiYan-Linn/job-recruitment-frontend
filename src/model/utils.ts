@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuthentication } from "./stores/authentication-store";
 import { refreshToken } from "./clients/token-client";
+import { useAccessToken } from "./stores/use-accessToken";
 
 export const BASE_URL = "http://localhost:8080";
 
@@ -10,12 +11,12 @@ export const client = axios.create({
 
 client.interceptors.request.use(
   (request) => {
-    const authentication = useAuthentication.getState().authentication;
-    console.log("Current Auth State:", authentication);
+    const { accessToken } = useAccessToken.getState();
+    console.log("Current Auth State:", accessToken);
 
-    if (authentication && typeof request.url === "string") {
+    if (accessToken && typeof request.url === "string") {
       if (!request.url.includes("/anonymous/signup/otp-verification"))
-        request.headers["Authorization"] = authentication.accessToken;
+        request.headers["Authorization"] = accessToken;
     }
     console.log(request.url);
 
@@ -46,7 +47,14 @@ client.interceptors.response.use(
           });
           console.log("New token received:", response.accessToken);
 
-          setAuthentication(response);
+          useAccessToken.getState().setAccessToken(response.accessToken);
+
+          // Update persistent store if a new refresh token is provided
+          setAuthentication({
+            ...authentication,
+            refreshToken: response.refreshToken || authentication.refreshToken,
+          });
+
           client.defaults.headers.common["Authorization"] =
             response.accessToken;
 

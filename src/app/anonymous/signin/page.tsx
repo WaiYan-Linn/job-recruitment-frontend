@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { SignInForm } from "@/model/domains/anonymous.domain";
 import { useAuthentication } from "@/model/stores/authentication-store";
 import { generateToken } from "@/model/clients/token-client";
+import { useAccessToken } from "@/model/stores/use-accessToken";
 
 export default function SigninPage() {
   const router = useRouter();
@@ -19,10 +20,20 @@ export default function SigninPage() {
   const signIn = async (form: SignInForm) => {
     setLoading(true);
     const result = await generateToken(form);
-    setAuthentication(result);
-    if (result.role === "JobSeeker") {
+
+    // Update access token in memory
+    const { setAccessToken } = useAccessToken.getState();
+    setAccessToken(result.accessToken);
+
+    // Prepare data for cookie storage
+    const { accessToken, ...cookieData } = result;
+
+    // Update authentication details in cookies
+    const { setAuthentication } = useAuthentication.getState();
+    setAuthentication(cookieData);
+    if (result.role === "JOBSEEKER") {
       router.push("/jobseeker");
-    } else if (result.role === "Employer") {
+    } else if (result.role === "EMPLOYER") {
       router.push("/employer");
     } else {
       router.push("/admin");
@@ -146,7 +157,7 @@ export default function SigninPage() {
             Don't have an account?{" "}
             <a
               href="/anonymous/signup"
-              className="font-medium text-purple-700 dark:text-gray-300 hover:text-indigo-500"
+              className="font-medium text-purple-700 dark:text-gray-600 hover:text-indigo-500"
             >
               Sign up
             </a>

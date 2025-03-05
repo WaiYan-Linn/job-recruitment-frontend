@@ -62,16 +62,6 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("job.recruit");
-
-    if (!isTokenValid(token)) {
-      console.log("Token expired, clearing storage...");
-      localStorage.removeItem("job.recruit");
-      useAuthentication.getState().setAuthentication(undefined);
-    }
-  }, []);
-
   const featuredCompanies = [
     {
       id: 1,

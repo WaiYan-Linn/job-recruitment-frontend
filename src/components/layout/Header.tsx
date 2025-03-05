@@ -37,7 +37,9 @@ export const Header = () => {
 
   const handleSignIn = () => router.push("/anonymous/signup");
   const isAuthPage =
-    pathname === "/anonymous/signup" || pathname === "/anonymous/signin";
+    pathname === "/anonymous/signup" ||
+    pathname === "/anonymous/signin" ||
+    pathname === "/anonymous/signup/otp-verification";
 
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-50 transition">
@@ -136,21 +138,7 @@ export const Header = () => {
             >
               {theme === "dark" ? (
                 // Sun icon for light mode
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-sun text-gray-800"
-                >
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-                </svg>
+                <Sun className="text-gray-800" size={24} />
               ) : (
                 // Moon icon for dark mode
                 <svg
@@ -187,7 +175,7 @@ export const Header = () => {
               <button
                 onClick={() => {
                   setShowRegisterModal(false);
-                  router.push("/anonymous/signup");
+                  router.push("/anonymous/signup?role=JOBSEEKER");
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
               >
@@ -196,7 +184,7 @@ export const Header = () => {
               <button
                 onClick={() => {
                   setShowRegisterModal(false);
-                  router.push("/employer/signup");
+                  router.push("/anonymous/signup?role=EMPLOYER");
                 }}
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
               >

@@ -12,16 +12,31 @@ export type AccountInfo = {
   accessToken: string;
   refreshToken: string;
 };
+export type StoreInCookies = {
+  name: string;
+  email: string;
+  role: Role;
+  refreshToken: string;
+};
 
 export type OtpCode = {
   code: string;
 };
 
-export type SignUpForm = {
+export type isAuthenticated = {
+  isAuthenticated: boolean;
+};
+
+export type AccessToken = {
   name: string;
+};
+
+export type SignUpForm = {
+  name?: string;
   phone: string;
   email: string;
   password: string;
+  role: string;
 };
 
 export type RefreshForm = {
