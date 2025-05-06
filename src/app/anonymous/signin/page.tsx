@@ -6,6 +6,7 @@ import { SignInForm } from "@/model/domains/anonymous.domain";
 import { useAuthentication } from "@/model/stores/authentication-store";
 import { generateToken } from "@/model/clients/token-client";
 import { useAccessToken } from "@/model/stores/use-accessToken";
+import { client } from "@/model/utils"; // wherever you create the axios instance
 
 export default function SigninPage() {
   const router = useRouter();
@@ -22,8 +23,10 @@ export default function SigninPage() {
     const result = await generateToken(form);
 
     // Update access token in memory
-    const { setAccessToken } = useAccessToken.getState();
-    setAccessToken(result.accessToken);
+    const token = result.accessToken;
+    useAccessToken.getState().setAccessToken(token);
+    console.log("Access token set in memory:", result.accessToken);
+    client.defaults.headers.common["Authorization"] = result.accessToken; // <-- manually set it immediately
 
     // Prepare data for cookie storage
     const { accessToken, ...cookieData } = result;

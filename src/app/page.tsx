@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import myImage from "@/lib/modern-equipped-computer-lab.jpg";
-import custom from "@/lib/long-shot-business-people-meeting.jpg";
+import custom from "@/lib/vecteezy_young-burmese-businessmen-meet-and-talk-about-their-business_7541872.jpg";
 import JobSlider from "@/components/layout/JobSlider";
 import { useAuthentication } from "@/model/stores/authentication-store";
 import {
@@ -180,16 +180,15 @@ const App = () => {
         style={{ minHeight: "100vh" }}
       >
         <div
-          className="absolute top-0 w-full h-full bg-cover bg-center shadow-lg"
+          className="absolute top-0 w-full h-full shadow-lg"
           style={{
             backgroundImage: `url(${custom.src})`,
-            // backgroundImage:
-            // "url('https://img.freepik.com/free-photo/businesspeople-meeting-office-working_23-2148908920.jpg?t=st=1739979759~exp=1739983359~hmac=d1f5585d4ecc593f88039cc882890c49e2b3f74b7dbc1c4463540900196edc0f&w=996')",
-            // backgroundImage:
-            //   "url('https://www.risefor-career.com/images/top/RISEforCarrer_A001_TOP.png')",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
             filter: "brightness(0.7)",
           }}
-        />
+        ></div>
 
         <div className="absolute bottom-10 mx-auto px-16 w-full max-w-6xl overflow-visible">
           <div className="job-slider-wrapper relative">

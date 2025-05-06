@@ -42,14 +42,14 @@ export const Header = () => {
     pathname === "/anonymous/signup/otp-verification";
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-50 transition">
+    <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-20 transition">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           {/* Left - Logo & Navigation */}
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-8 ml-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              <span className="text-xl font-bold text-gray-900 dark:text-gray-200">
+              <Briefcase className="hidden md:block h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <span className="text-xl font-bold  text-gray-900 dark:text-gray-200">
                 CareerHub
               </span>
             </Link>
@@ -105,31 +105,32 @@ export const Header = () => {
               )
             )}
 
-            {/* Social Media Links */}
-            <div className="flex space-x-3">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 transition"
-              >
-                <Facebook size={24} />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-pink-500 hover:text-pink-700 transition"
-              >
-                <Instagram size={24} />
-              </a>
-              <a
-                href="mailto:contact@careerhub.com"
-                className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              >
-                <Mail size={24} />
-              </a>
-            </div>
+            {!authentication && (
+              <div className="flex space-x-3">
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 transition"
+                >
+                  <Facebook size={24} />
+                </a>
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-pink-500 hover:text-pink-700 transition"
+                >
+                  <Instagram size={24} />
+                </a>
+                <a
+                  href="mailto:contact@careerhub.com"
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                >
+                  <Mail size={24} />
+                </a>
+              </div>
+            )}
 
             {/* Dark Mode Toggle */}
             <button

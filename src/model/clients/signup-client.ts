@@ -9,15 +9,11 @@ export async function accountSignup(
 ): Promise<AccountInfo> {
   try {
     // Send the SignUpForm data and OTP (code) as query param
-    const response = await client.post<AccountInfo>(
-      `${BASE_URL}/security/signup`,
-      form,
-      {
-        params: {
-          code: otp, // Pass the OTP (entered by the user) here
-        },
-      }
-    );
+    const response = await client.post<AccountInfo>("/security/signup", form, {
+      params: {
+        code: otp, // Pass the OTP (entered by the user) here
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Signup failed:", error);
@@ -26,10 +22,7 @@ export async function accountSignup(
 }
 export async function accountRegister(form: SignUpForm): Promise<string> {
   try {
-    const response = await client.post<string>(
-      `${BASE_URL}/security/register`,
-      form
-    );
+    const response = await client.post<string>("/security/register", form);
     return response.data; // Should return "OTP sent" or a success message
   } catch (error) {
     console.error("Registration failed:", error);

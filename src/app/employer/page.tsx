@@ -1,666 +1,369 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
-  Briefcase,
-  Users,
-  FileText,
-  BarChart2,
+  Bell,
+  Calendar,
+  ChevronDown,
+  FilePlus,
+  Menu,
   MessageSquare,
-  Plus,
-  Filter,
   Search,
-  ArrowUpRight,
-  Clock,
-  UserCheck,
-  AlertCircle,
+  Settings,
+  X,
 } from "lucide-react";
-import custom from "@/lib/front-view-business-people-talking.jpg";
-import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
-const EmployerDashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+// Mock data for charts and stats
+const applicationData = [
+  { name: "Jan", applications: 45 },
+  { name: "Feb", applications: 52 },
+  { name: "Mar", applications: 61 },
+  { name: "Apr", applications: 67 },
+  { name: "May", applications: 55 },
+  { name: "Jun", applications: 71 },
+  { name: "Jul", applications: 82 },
+];
 
-  // Sample data - in a real application this would come from your API
-  const stats = [
-    {
-      title: "Active Jobs",
-      value: 12,
-      icon: Briefcase,
-      color: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300",
-    },
-    {
-      title: "Total Applicants",
-      value: 143,
-      icon: Users,
-      color:
-        "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-    },
-    {
-      title: "Interviews Scheduled",
-      value: 8,
-      icon: Clock,
-      color:
-        "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300",
-    },
-    {
-      title: "Positions Filled",
-      value: 3,
-      icon: UserCheck,
-      color:
-        "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300",
-    },
-  ];
+const recentApplicants = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    role: "UX Designer",
+    status: "interview",
+    avatar: "SJ",
+  },
+  {
+    id: 2,
+    name: "Michael Chen",
+    role: "Frontend Developer",
+    status: "review",
+    avatar: "MC",
+  },
+  {
+    id: 3,
+    name: "Aisha Patel",
+    role: "Product Manager",
+    status: "new",
+    avatar: "AP",
+  },
+  {
+    id: 4,
+    name: "David Kim",
+    role: "Data Analyst",
+    status: "interview",
+    avatar: "DK",
+  },
+];
 
-  const recentApplications = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      position: "Senior Frontend Developer",
-      date: "2 hours ago",
-      status: "New",
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      position: "DevOps Engineer",
-      date: "5 hours ago",
-      status: "Reviewed",
-    },
-    {
-      id: 3,
-      name: "Jessica Park",
-      position: "Product Manager",
-      date: "1 day ago",
-      status: "Interview",
-    },
-    {
-      id: 4,
-      name: "David Smith",
-      position: "UX Designer",
-      date: "2 days ago",
-      status: "Rejected",
-    },
-  ];
+const upcomingInterviews: any = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    role: "UX Designer",
+    time: "10:00 AM",
+    date: "Today",
+  },
+  {
+    id: 2,
+    name: "David Kim",
+    role: "Data Analyst",
+    time: "2:30 PM",
+    date: "Tomorrow",
+  },
+  {
+    id: 3,
+    name: "James Wilson",
+    role: "Backend Developer",
+    time: "11:15 AM",
+    date: "May 5",
+  },
+];
 
-  const activeJobs = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      applicants: 24,
-      posted: "5 days ago",
-      status: "Active",
-    },
-    {
-      id: 2,
-      title: "DevOps Engineer",
-      applicants: 16,
-      posted: "1 week ago",
-      status: "Active",
-    },
-    {
-      id: 3,
-      title: "Product Manager",
-      applicants: 31,
-      posted: "2 weeks ago",
-      status: "Active",
-    },
-    {
-      id: 4,
-      title: "UX Designer",
-      applicants: 18,
-      posted: "3 weeks ago",
-      status: "Closing Soon",
-    },
-  ];
+export default function EmployerDashboard() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  const router = useRouter();
-  const handleRouting = () => {
-    router.push("/employer/jobposting");
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => setProgress(75), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: any) => {
     switch (status) {
-      case "New":
-        return "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300";
-      case "Reviewed":
-        return "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300";
-      case "Interview":
-        return "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300";
-      case "Rejected":
-        return "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300";
-      case "Active":
-        return "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300";
-      case "Closing Soon":
-        return "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300";
+      case "new":
+        return <Badge className="bg-blue-500">New</Badge>;
+      case "review":
+        return <Badge className="bg-yellow-500">In Review</Badge>;
+      case "interview":
+        return <Badge className="bg-green-500">Interview</Badge>;
       default:
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300";
+        return <Badge>Unknown</Badge>;
     }
   };
 
   return (
-    <div
-      className="relative pt-20 pb-16 min-h-screen bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url(
-        'https://images.unsplash.com/photo-1481026469463-66327c86e544?q=80&w=2108&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' )`,
-      }}
-    >
-      {/* Background overlay for readability */}
-      <div className="absolute inset-0 bg-black opacity-10"></div>
-      <div className="relative max-w-6xl mx-auto px-6">
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="relative inline-block text-4xl font-extrabold dark:to-gray-700 dark:form-dark  bg-gradient-to-r  from-zinc-800 via-blue-800 to-gray-800  text-transparent bg-clip-text mb-2">
-              Dashboard
-            </h1>
-            <p className="text-gray-600 bg-gradient-to-r from-gray-800 to-black mt-2 text-transparent bg-clip-text dark:text-gray-900">
-              Manage your job listings and applicants
-            </p>
-          </div>
-
-          <div className="mt-4 md:mt-0 flex space-x-3">
-            <button
-              onClick={handleRouting}
-              className="flex items-center dark:bg-indigo-600 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition shadow"
-            >
-              <Plus size={18} className="mr-2" />
-              Post New Job
-            </button>
-          </div>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 transition border border-gray-200 dark:border-gray-700"
-            >
-              <div className="flex items-center">
-                <div className={`p-3 rounded-lg ${stat.color} mr-4`}>
-                  <stat.icon size={24} />
-                </div>
-                <div>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-                    {stat.title}
-                  </p>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stat.value}
-                  </h3>
-                </div>
-              </div>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-300 flex-col md:flex-row ">
+      {/* Content Area */}
+      <div className="flex-1  ">
+        {/* Top Navigation */}
+        <div className=" z-10 bg-white dark:bg-gray-300 shadow fixed top-0 w-full md:relative md:top-auto md:shadow-none">
+          <div className="flex items-center justify-between h-16 px-4 md:px-6">
+            <div className="flex items-center">
+              <h2 className="text-lg font-semibold ml-2 md:ml-0 dark:text-gray-900">
+                Dashboard
+              </h2>
             </div>
-          ))}
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+                <Input
+                  type="search"
+                  placeholder="Search..."
+                  className="pl-10 w-64"
+                />
+              </div>
+              <Link href="/employer/job-posting/">
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <FilePlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Post a Job</span>
+                </Button>
+              </Link>
+
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="hidden md:flex items-center space-x-2"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="/api/placeholder/32/32" alt="Profile" />
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem>Billing</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Sign out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </div>
 
-        {/* Main Content Tabs */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex">
-              <button
-                onClick={() => setActiveTab("overview")}
-                className={`px-4 py-3 text-sm font-medium ${
-                  activeTab === "overview"
-                    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveTab("jobs")}
-                className={`px-4 py-3 text-sm font-medium ${
-                  activeTab === "jobs"
-                    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
-              >
-                My Jobs
-              </button>
-              <button
-                onClick={() => setActiveTab("applications")}
-                className={`px-4 py-3 text-sm font-medium ${
-                  activeTab === "applications"
-                    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
-              >
-                Applications
-              </button>
-            </nav>
+        {/* Main Content */}
+        <main className="pt-16 mt-24   md:m-0 p-4 md:p-6">
+          {/* Dashboard Overview Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm font-medium">
+                  Total Positions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">18</div>
+                <p className="text-xs text-green-500">+2 this month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm font-medium">
+                  Active Applicants
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">237</div>
+                <p className="text-xs text-green-500">+12% from last month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm font-medium">
+                  Interviews Scheduled
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">28</div>
+                <p className="text-xs text-green-500">Next: Today, 10:00 AM</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm font-medium">
+                  Hiring Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="">
+                <Progress value={progress} className="h-2 " />
+                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                  <div>75% Complete</div>
+                  <div>May 15 Target</div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="p-6">
-            {activeTab === "overview" && (
-              <div>
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                      Recent Applications
-                    </h2>
-                    <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-                      View All <ArrowUpRight size={16} className="ml-1" />
-                    </button>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Applicant
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Position
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Applied
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Status
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        {recentApplications.map((app) => (
-                          <tr
-                            key={app.id}
-                            className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="font-medium text-gray-900 dark:text-white">
-                                {app.name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-700 dark:text-gray-300">
-                                {app.position}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {app.date}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                                  app.status
-                                )}`}
-                              >
-                                {app.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right">
-                              <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium">
-                                View
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+          {/* Trends & Upcoming Interviews */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Application Trends</CardTitle>
+                <CardDescription>Monthly application volume</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={applicationData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="applications"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                      Active Job Listings
-                    </h2>
-                    <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-                      View All <ArrowUpRight size={16} className="ml-1" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {activeJobs.map((job) => (
-                      <div
-                        key={job.id}
-                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-5 bg-gray-50 dark:bg-gray-800 hover:shadow-md transition"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                              {job.title}
-                            </h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                              <span className="flex items-center">
-                                <Users size={16} className="mr-1" />
-                                {job.applicants} Applicants
-                              </span>
-                              <span className="flex items-center">
-                                <Clock size={16} className="mr-1" />
-                                Posted {job.posted}
-                              </span>
-                            </div>
-                          </div>
-                          <span
-                            className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                              job.status
-                            )}`}
-                          >
-                            {job.status}
-                          </span>
-                        </div>
-                        <div className="mt-4 flex justify-end space-x-2">
-                          <button className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1 border border-gray-200 dark:border-gray-700 rounded">
-                            Edit
-                          </button>
-                          <button className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 px-3 py-1 border border-blue-200 dark:border-blue-700 rounded">
-                            View Applicants
-                          </button>
-                        </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Upcoming Interviews</CardTitle>
+                <CardDescription>Next 3 scheduled interviews</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {upcomingInterviews.map((interview: any) => (
+                    <div key={interview.id} className="flex items-center">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>
+                          {interview.name
+                            .split(" ")
+                            .map((n: any) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="ml-4 space-y-1">
+                        <p className="text-sm font-medium">{interview.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {interview.role}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "jobs" && (
-              <div>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                  <div className="relative w-full md:w-64 mb-4 md:mb-0">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Search size={16} className="text-gray-400" />
+                      <div className="ml-auto text-right">
+                        <p className="text-sm font-medium">{interview.time}</p>
+                        <p className="text-xs text-gray-500">
+                          {interview.date}
+                        </p>
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-                      placeholder="Search jobs..."
-                    />
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <button className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                      <Filter size={16} className="mr-2" />
-                      Filter
-                    </button>
-                    <button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition shadow">
-                      <Plus size={16} className="mr-2" />
-                      Add New
-                    </button>
-                  </div>
+                  ))}
                 </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Job Title
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Applicants
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Posted Date
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Status
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        {activeJobs
-                          .concat([
-                            {
-                              id: 5,
-                              title: "Backend Engineer",
-                              applicants: 28,
-                              posted: "1 month ago",
-                              status: "Closed",
-                            },
-                            {
-                              id: 6,
-                              title: "Marketing Specialist",
-                              applicants: 45,
-                              posted: "2 months ago",
-                              status: "Closed",
-                            },
-                          ])
-                          .map((job) => (
-                            <tr
-                              key={job.id}
-                              className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="font-medium text-gray-900 dark:text-white">
-                                  {job.title}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-700 dark:text-gray-300">
-                                  {job.applicants}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {job.posted}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span
-                                  className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                                    job.status
-                                  )}`}
-                                >
-                                  {job.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
-                                  View
-                                </button>
-                                <button className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300">
-                                  Edit
-                                </button>
-                                {job.status !== "Closed" && (
-                                  <button className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
-                                    Close
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "applications" && (
-              <div>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                  <div className="relative w-full md:w-64 mb-4 md:mb-0">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Search size={16} className="text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-                      placeholder="Search applicants..."
-                    />
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <select className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                      <option>All Jobs</option>
-                      <option>Senior Frontend Developer</option>
-                      <option>DevOps Engineer</option>
-                      <option>Product Manager</option>
-                      <option>UX Designer</option>
-                    </select>
-                    <select className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                      <option>All Statuses</option>
-                      <option>New</option>
-                      <option>Reviewed</option>
-                      <option>Interview</option>
-                      <option>Rejected</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Applicant
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Job Position
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Applied Date
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Status
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                          >
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        {recentApplications
-                          .concat([
-                            {
-                              id: 5,
-                              name: "Robert Johnson",
-                              position: "Senior Frontend Developer",
-                              date: "3 days ago",
-                              status: "Interview",
-                            },
-                            {
-                              id: 6,
-                              name: "Emily Watson",
-                              position: "UX Designer",
-                              date: "4 days ago",
-                              status: "Reviewed",
-                            },
-                            {
-                              id: 7,
-                              name: "Tyler Greene",
-                              position: "DevOps Engineer",
-                              date: "1 week ago",
-                              status: "Rejected",
-                            },
-                            {
-                              id: 8,
-                              name: "Lisa Chen",
-                              position: "Product Manager",
-                              date: "1 week ago",
-                              status: "New",
-                            },
-                          ])
-                          .map((app) => (
-                            <tr
-                              key={app.id}
-                              className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="font-medium text-gray-900 dark:text-white">
-                                  {app.name}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-700 dark:text-gray-300">
-                                  {app.position}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {app.date}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span
-                                  className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                                    app.status
-                                  )}`}
-                                >
-                                  {app.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                <button className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
-                                  View Resume
-                                </button>
-                                <button className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300">
-                                  Schedule
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full">
+                  View All Interviews
+                </Button>
+              </CardFooter>
+            </Card>
           </div>
-        </div>
+
+          {/* Recent Applicants Table */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Recent Applicants</CardTitle>
+              <CardDescription>Latest candidates who applied</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="text-gray-500 border-b">
+                    <tr>
+                      <th className="p-2 pl-0">Applicant</th>
+                      <th className="p-2">Position</th>
+                      <th className="p-2">Status</th>
+                      <th className="p-2 pr-0 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentApplicants.map((applicant) => (
+                      <tr key={applicant.id} className="border-b">
+                        <td className="py-3 pl-0">
+                          <div className="flex items-center">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>
+                                {applicant.avatar}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="ml-2 font-medium">
+                              {applicant.name}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3">{applicant.role}</td>
+                        <td className="py-3">
+                          {getStatusBadge(applicant.status)}
+                        </td>
+                        <td className="py-3 pr-0 text-right">
+                          <Button variant="ghost" size="sm">
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full">
+                View All Applicants
+              </Button>
+            </CardFooter>
+          </Card>
+        </main>
       </div>
     </div>
   );
-};
-
-export default EmployerDashboard;
+}
