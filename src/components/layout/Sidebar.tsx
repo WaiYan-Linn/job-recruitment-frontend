@@ -17,11 +17,11 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navItems = [
     { href: "/employer", icon: Home, label: "Dashboard" },
-    { href: "/candidates", icon: Users, label: "Candidates" },
-    { href: "/employer/job-posting", icon: FilePlus, label: "Job Listings" },
+    { href: "/employer/candidates", icon: Users, label: "Candidates" },
+    { href: "/employer/job-listing", icon: FilePlus, label: "Job Listings" },
     { href: "/schedule", icon: Calendar, label: "Schedule" },
     { href: "/messages", icon: MessageSquare, label: "Messages" },
-    { href: "/settings", icon: Settings, label: "Settings" },
+    { href: "/employer/settings", icon: Settings, label: "Settings" },
   ];
 
   return (

@@ -1,9 +1,17 @@
 "use client"; // Only for Next.js App Router
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Profiler } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Briefcase,
   Building,
@@ -15,8 +23,15 @@ import {
   Facebook,
   Instagram,
   Mail,
+  ChevronDown,
+  LayoutDashboard,
+  LayoutDashboardIcon,
+  Inbox,
+  User,
 } from "lucide-react";
 import { useAuth } from "@/model/providers/AuthContext";
+import { Button } from "../ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const Header = () => {
   const router = useRouter();
@@ -77,13 +92,22 @@ export const Header = () => {
           <div className="flex items-center space-x-4">
             {/* User Authentication Actions */}
             {authentication ? (
-              <button
-                onClick={signOut}
-                className="flex items-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-              >
-                <LogOut size={24} />
-                <span>Log Out</span>
-              </button>
+              <>
+                <Link
+                  href="/employer"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                >
+                  <User size={18} />
+                  <span>Management</span>
+                </Link>
+                <button
+                  onClick={signOut}
+                  className="flex items-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                >
+                  <LogOut size={24} />
+                  <span>Log Out</span>
+                </button>
+              </>
             ) : (
               !isAuthPage && (
                 <>

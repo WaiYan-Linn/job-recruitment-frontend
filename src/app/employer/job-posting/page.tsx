@@ -74,14 +74,7 @@ export default function PostJobPage() {
   const isStep3Valid = watch("deadline") && watch("applicationEmail");
 
   return (
-    <div
-      className="w-full min-h-screen pb-16 bg-cover bg-gray-50 dark:bg-gray-800 flex flex-col md:flex-row overflow-hidden"
-      style={{
-        //backgroundImage: `url(${custom.src})`,
-        backgroundImage:
-          "url('https://images.pexels.com/photos/796602/pexels-photo-796602.jpeg?auto=compress&cs=tinysrgb&w=600')",
-      }}
-    >
+    <div className="w-full min-h-screen pb-16  bg-gray-50 dark:bg-gray-800 flex flex-col md:flex-row overflow-hidden">
       <div className=" mx-auto ">
         <>
           <div className="mb-4 text-center">
