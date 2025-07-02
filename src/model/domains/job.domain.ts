@@ -79,3 +79,16 @@ export interface PageResult<T> {
   size: number;
   currentPage: number;
 }
+
+export type JobDetailsWithStatus = {
+  jobDetails: JobDetails;
+  hasApplied: boolean;
+};
+
+export interface FetchJobParams {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  location?: string;
+  specialization?: string;
+}

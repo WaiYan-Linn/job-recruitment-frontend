@@ -20,10 +20,12 @@ import {
 } from "lucide-react";
 import custom from "@/lib/vecteezy_two-young-professionals-both-caucasian-shaking-hands-in-a_27183776.jpg";
 import { createJob } from "@/model/clients/job-client";
+import { useRouter } from "next/navigation";
 
 export default function PostJobPage() {
   const [formStep, setFormStep] = useState(1);
   const [previewMode, setPreviewMode] = useState(false);
+  const router = useRouter();
 
   const { register, control, handleSubmit, watch, getValues } =
     useForm<JobRequest>({
@@ -45,6 +47,7 @@ export default function PostJobPage() {
 
   const onSubmit = async (data: JobRequest) => {
     await createJob(data);
+    router.push("/employer/job-listing");
   };
 
   const nextStep = () => {
@@ -62,11 +65,6 @@ export default function PostJobPage() {
     window.scrollTo(0, 0);
   };
 
-  const submitJob = () => {
-    // API call to your Spring backend would go here
-    console.log("Submitting job data:");
-  };
-
   // Basic validation for each step
   const isStep1Valid = watch("title") && watch("location") && watch("category");
   const isStep2Valid =
@@ -74,8 +72,8 @@ export default function PostJobPage() {
   const isStep3Valid = watch("deadline") && watch("applicationEmail");
 
   return (
-    <div className="w-full min-h-screen pb-16  bg-gray-50 dark:bg-gray-800 flex flex-col md:flex-row overflow-hidden">
-      <div className=" mx-auto ">
+    <div className="w-full min-h-screen pb-16 pt-8 bg-gradient-to-r from-indigo-100 via-white/50 to-blue-100 dark:bg-gray-800 flex flex-col md:flex-row overflow-hidden">
+      <div className=" md:mx-auto mx-2">
         <>
           <div className="mb-4 text-center">
             <h1 className="relative inline-block text-4xl font-extrabold dark:text-gray-900 text-gray-900  bg-gradient-to-r  from-zinc-800 via-blue-800 to-gray-800  text-transparent bg-clip-text mb-2">
@@ -122,18 +120,6 @@ export default function PostJobPage() {
             </div>
           </div>
 
-          {/* Preview Toggle on Step 4 */}
-          {formStep === 4 && (
-            <div className="mb-6">
-              <button
-                onClick={togglePreview}
-                className="w-full py-3 px-4 border border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition font-medium"
-              >
-                {previewMode ? "Edit Job Details" : "Preview Job Listing"}
-              </button>
-            </div>
-          )}
-
           {/* Form Content */}
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
@@ -166,14 +152,23 @@ export default function PostJobPage() {
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Department*
                           </label>
-                          <input
+                          <select
                             {...register("category")}
                             className="block w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-                            placeholder="e.g. Engineering, Marketing"
                             required
-                          />
+                          >
+                            <option value="">Select a department</option>
+                            <option value="IT">IT</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Banking">Banking</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Design">Design</option>
+                            <option value="Others">Others</option>
+                          </select>
                         </div>
                       </div>
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Location*
@@ -185,7 +180,7 @@ export default function PostJobPage() {
                           <input
                             {...register("location")}
                             className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-                            placeholder="e.g. New York, NY"
+                            placeholder="e.g. Yangon"
                             required
                           />
                         </div>
@@ -477,115 +472,15 @@ export default function PostJobPage() {
                 {/* Step 4: Review & Submit */}
                 {formStep === 4 && (
                   <div>
-                    {previewMode ? (
-                      <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                          Preview Job Listing
-                        </h2>
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                              {getValues("title")}
-                            </h3>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("location")}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Category:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("category")}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Remote Options:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("workMode")}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Employment Type:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("jobType")}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Experience Level:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("experience")}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Salary:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("salaryMin")} {getValues("salaryMax")}/{" "}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Job Description:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("description")}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Requirements:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("requirements")}{" "}
-                            </p>
-                          </div>
-                          {getValues("benefits") && (
-                            <div>
-                              <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                                Benefits:
-                              </h4>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                {getValues("benefits")}
-                              </p>
-                            </div>
-                          )}
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Application Deadline:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("deadline")}{" "}
-                            </p>
-                          </div>
-                          <div>
-                            <h4 className="text-md font-semibold text-gray-800 dark:text-gray-200">
-                              Application Email:
-                            </h4>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {getValues("applicationEmail")}{" "}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                          Review &amp; Submit
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
-                          Please review your job listing details before
-                          submitting.
-                        </p>
-                      </div>
-                    )}
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                        Review &amp; Submit
+                      </h2>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Please review your job listing details before
+                        submitting.
+                      </p>
+                    </div>
                     <div className="flex justify-between mt-8">
                       <button
                         onClick={prevStep}

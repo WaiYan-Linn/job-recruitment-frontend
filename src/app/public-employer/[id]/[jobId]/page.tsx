@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { fetchJobsById } from "@/model/clients/job-client";
 
 interface Props {
-  params: { id: string; jobId: string }; // this is already awaited by Next
+  params: Promise<{ jobId: string }>;
 }
 
 export default async function JobPage({ params }: Props) {
-  const job = await fetchJobsById(Number(params.jobId));
+  const { jobId } = await params; // <-- Await the params promise here
+
+  const job = await fetchJobsById(Number(jobId));
   if (!job) return notFound();
 
   return <JobDetailsClient job={job} />;

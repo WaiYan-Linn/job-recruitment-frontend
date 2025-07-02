@@ -18,6 +18,8 @@ const checkRoleAccess = (
 };
 
 export async function middleware(req: NextRequest) {
+  console.log("Middleware triggered"); // <== DEBUG
+
   const tokenCookie = req.cookies.get("job.recruit")?.value;
   const currentPath = req.nextUrl.pathname;
 

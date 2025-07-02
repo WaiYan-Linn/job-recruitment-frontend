@@ -13,11 +13,6 @@ export default function JobListingPage() {
   const setProfilePicture = useProfileStore((state) => state.setProfilePicture);
   const profilePicture = useProfileStore((state) => state.profilePicture);
 
-  // Format salary range
-  const formatSalary = (min: number, max: number) => {
-    return `$${(min / 1000).toFixed(0)}k - $${(max / 1000).toFixed(0)}k`;
-  };
-
   const router = useRouter();
 
   const handleJobClick = (jobId: number, jobData: JobListing) => {
@@ -102,7 +97,7 @@ export default function JobListingPage() {
                     </div>
                     <div className="flex justify-between mt-3 text-sm">
                       <span className="text-gray-600">
-                        {formatSalary(job.salaryMin, job.salaryMax)}
+                        MMK {job.salaryMin} - {job.salaryMax}
                       </span>
                       <span className="text-gray-500">
                         Posted {formatDate(job.postedAt)}

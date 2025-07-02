@@ -30,7 +30,7 @@ import {
   Box,
   Underline,
 } from "lucide-react";
-import { JobDetails } from "@/model/domains/job.domain";
+import { JobDetails, JobDetailsWithStatus } from "@/model/domains/job.domain";
 import { fetchJobs } from "@/model/clients/job-client";
 import { EmployerProfile } from "@/model/domains/employer.domain";
 import {
@@ -43,11 +43,30 @@ import {
   fetchEmployerProfile,
 } from "@/model/clients/employer-client";
 import { set } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import JobCard from "@/components/layout/JobCard";
 
 const App = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const router = useRouter();
+
+  const [specialization, setSpecialization] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [location, setLocation] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const query = new URLSearchParams();
+    if (specialization) query.append("specialization", specialization);
+    if (keyword) query.append("keyword", keyword);
+    if (location) query.append("location", location);
+
+    router.push(`/jobs?${query.toString()}`);
+  };
 
   const isTokenValid = (token: string | null) => {
     if (!token) return false;
@@ -84,12 +103,12 @@ const App = () => {
 
   const categories = [
     {
-      name: "Technology",
+      name: "IT",
       icon: <Code size={24} />,
       color: "from-indigo-300 to-indigo-500",
     },
     {
-      name: "Design",
+      name: "Engineering",
       icon: <Pencil size={24} />,
       color: "from-cyan-300 to-cyan-500 ",
     },
@@ -99,23 +118,29 @@ const App = () => {
       color: "from-red-300 to-red-500",
     },
     {
-      name: "Business",
+      name: "Sales",
       icon: <PieChart size={24} />,
       color: "from-yellow-300 to-yellow-500 ",
     },
     {
-      name: "Sales",
+      name: "Banking",
       icon: <ShoppingBag size={24} />,
       color: "from-blue-300 to-blue-500",
     },
     {
-      name: "Customer Service",
+      name: "Design",
       icon: <Users size={24} />,
       color: "from-teal-300 to-teal-500 ",
     },
+
+    {
+      name: "Others",
+      icon: <Users size={24} />,
+      color: "from-purple-300 to-purple-500 ",
+    },
   ];
 
-  const [featuredJobs, setFeaturedJobs] = useState<JobDetails[]>([]);
+  const [featuredJobs, setFeaturedJobs] = useState<JobDetailsWithStatus[]>([]);
 
   useEffect(() => {
     async function loadJobs() {
@@ -123,7 +148,7 @@ const App = () => {
         const res = await fetchJobs(0, 6); // Get the first page, size 6
         const jobs = Array.isArray(res?.contents) ? res.contents : [];
 
-        const companiesRes = await fetchAllCompanies(0, 6);
+        const companiesRes = await fetchAllCompanies(0, 10);
         const companies = Array.isArray(companiesRes?.contents)
           ? companiesRes.contents
           : [];
@@ -142,7 +167,7 @@ const App = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-indigo-100 via-purple-100 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-r from-indigo-100 via-purple-600 to-blue-100">
       {/* Navigation */}
 
       {/* Hero Section */}
@@ -157,7 +182,7 @@ const App = () => {
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            filter: "brightness(0.7)",
+            filter: "brightness(0.8)",
           }}
         ></div>
 
@@ -174,63 +199,78 @@ const App = () => {
         {/* Search Box */}
 
         <div className="absolute top-24 left-0 right-0 mb-12">
-          <div className="max-w-6xl px-14 mx-auto  ">
-            <div className=" p-6  rounded-2xl ">
-              <div className="flex flex-col md:flex-row gap-8">
-                <div className="flex-1 relative">
-                  {/* Left Icon */}
-                  <Box
-                    className="absolute top-0 left-4 h-full flex items-center pointer-events-none text-gray-400"
-                    size={24}
-                  />
-                  {/* Select Dropdown */}
-                  <select
-                    name="specialization"
-                    id="specialization"
-                    defaultValue=""
-                    className="text-gray-600 block text-base w-full pl-12 pr-10 py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
-                  >
-                    <option value="" className="" disabled hidden>
-                      Specialization
-                    </option>
-                    <option value="IT">IT</option>
-                    <option value="Engineer">Engineer</option>
-                  </select>
-                  {/* Custom Down Arrow */}
-                  <div className="absolute top-0 right-4 h-full flex items-center pointer-events-none">
-                    <ChevronDownIcon className="w-5 h-5 text-gray-400" />
+          <form onSubmit={handleSubmit}>
+            <div className="max-w-6xl px-14 mx-auto">
+              <div className="p-6 rounded-2xl">
+                <div className="flex flex-col md:flex-row gap-8">
+                  {/* Specialization Dropdown */}
+                  <div className="flex-1 relative">
+                    <Box
+                      className="absolute top-0 left-4 h-full flex items-center pointer-events-none text-gray-400"
+                      size={24}
+                    />
+                    <select
+                      name="specialization"
+                      id="specialization"
+                      value={specialization}
+                      onChange={(e) => setSpecialization(e.target.value)}
+                      className="text-gray-600 block text-base w-full pl-12 pr-10 py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                    >
+                      <option value="" disabled hidden>
+                        Specialization
+                      </option>
+                      {categories.map((category) => (
+                        <option key={category.name} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute top-0 right-4 h-full flex items-center pointer-events-none">
+                      <ChevronDownIcon className="w-5 h-5 text-gray-400" />
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex-1 relative">
-                  <Search
-                    className="absolute top-0 left-4 h-full flex items-center text-gray-400"
-                    size={24}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Job title or keyword"
-                    className="w-full pl-12 text-base pr-4 py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  {/* Keyword Input */}
+                  <div className="flex-1 relative">
+                    <Search
+                      className="absolute top-0 left-4 h-full flex items-center text-gray-400"
+                      size={24}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Job title or keyword"
+                      value={keyword}
+                      onChange={(e) => setKeyword(e.target.value)}
+                      className="w-full pl-12 text-base pr-4 py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
 
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Location"
-                    className="w-full pl-12 text-base pr-4 py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <MapPin
-                    className="absolute top-0 left-4 h-full flex items-center text-gray-400"
-                    size={24}
-                  />
+                  {/* Location Input */}
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder="Location"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full pl-12 text-base pr-4 py-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <MapPin
+                      className="absolute top-0 left-4 h-full flex items-center text-gray-400"
+                      size={24}
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-700 shadow-lg border-b-2 border-blue-700 hover:border-blue-500 text-gray-100 px-8 py-2 rounded-lg transition-colors text-lg font-medium"
+                  >
+                    Search
+                  </button>
                 </div>
-                <button className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg border-b-2 border-blue-700 hover:border-blue-500  text-gray-100 px-8 py-2 rounded-lg transition-colors text-lg font-medium">
-                  Search
-                </button>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
 
@@ -241,91 +281,20 @@ const App = () => {
               <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
                 🔥 Latest Jobs
               </h2>
-              <button className="px-5 py-2 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition">
-                View All Jobs
-              </button>
+              <form onSubmit={handleSubmit}>
+                <button className="px-5 py-2 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition">
+                  View All Jobs
+                </button>
+              </form>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {featuredJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="relative group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl p-6 hover:shadow-3xl transition-all duration-300"
-                >
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex gap-4 items-center">
-                      <img
-                        src={`http://localhost:8080${job.employer.profilePictureUrl}`}
-                        alt={job.employer.companyName}
-                        className="w-14 h-14 rounded-xl object-cover bg-white shadow"
-                      />
-                      <div>
-                        <p className="text-base font-bold text-gray-800 dark:text-white">
-                          {job.employer.companyName}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {job.location}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-700/20 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-semibold">
-                      {job.jobType}
-                    </span>
-                  </div>
-
-                  <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition">
-                    {job.title}
-                  </h3>
-
-                  <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm mb-4">
-                    <Clock size={16} className="mr-2" />
-                    Posted: {new Date(job.postedAt).toLocaleDateString()}
-                  </div>
-
-                  <div className="mb-5 flex flex-wrap gap-2">
-                    {job.requirements.split(",").map((skill, index) => (
-                      <span
-                        key={index}
-                        className="bg-indigo-50 dark:bg-indigo-700/20 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full text-xs font-medium"
-                      >
-                        {skill.trim()}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-between items-center text-sm pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center text-gray-600 dark:text-gray-400">
-                      <MapPin size={16} className="mr-2" />
-                      {job.location}
-                    </div>
-                    <span className="font-bold text-indigo-700 dark:text-indigo-400">
-                      MMK {job.salaryMin} - {job.salaryMax}
-                    </span>
-                  </div>
-
-                  <div className="mt-6">
-                    <Link
-                      href={`/public-employer/${job.employer.id}/${job.id}`}
-                    >
-                      <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-purple-600 to-blue-500 text-white font-semibold rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-                        <span>Apply Now</span>
-                        <svg
-                          className="w-4 h-4 animate-bounce"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M14 5l7 7m0 0l-7 7m7-7H3"
-                          />
-                        </svg>
-                      </button>
-                    </Link>
-                  </div>
-                </div>
+              {featuredJobs.map(({ jobDetails, hasApplied }) => (
+                <JobCard
+                  key={jobDetails.id}
+                  jobDetails={jobDetails}
+                  hasApplied={hasApplied}
+                />
               ))}
             </div>
           </div>
@@ -421,7 +390,9 @@ const App = () => {
                     <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-4">
                       <div className="flex items-center gap-2">
                         <HiOutlineLocationMarker className="text-indigo-500" />
-                        <span className="italic">{company.address}</span>
+                        <span className="italic line-clamp-2">
+                          {company.address}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <HiOutlinePhone className="text-green-500" />
@@ -432,7 +403,7 @@ const App = () => {
                     </div>
 
                     <a
-                      href={`/employer/${company.id}`}
+                      href={`/public-employer/${company.id}`}
                       className="block text-center text-white bg-indigo-600 hover:bg-indigo-700 rounded-full px-4 py-2 font-semibold transition-colors duration-300"
                     >
                       View Profile

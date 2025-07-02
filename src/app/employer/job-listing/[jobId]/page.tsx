@@ -13,10 +13,6 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
   if (isNaN(id)) return notFound(); // handle invalid id
   const [job, setJob] = useState<JobDetails | null>(null);
 
-  // Format salary range
-  const formatSalary = (min: number, max: number) => {
-    return `$${(min / 1000).toFixed(0)}k - $${(max / 1000).toFixed(0)}k`;
-  };
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -67,19 +63,6 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
                 </p>
               </div>
             </div>
-            <div className="mt-4 md:mt-0">
-              <span
-                className={`px-4 py-2 text-sm font-semibold rounded-full ${
-                  getDaysLeft(job.deadline) > 0
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {getDaysLeft(job.deadline) > 0
-                  ? `${getDaysLeft(job.deadline)} days left`
-                  : "Expired"}
-              </span>
-            </div>
           </div>
 
           {/* Posted Info */}
@@ -92,7 +75,7 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
             <div className="bg-blue-50 p-4 rounded-xl shadow-sm">
               <p className="text-xs text-blue-800 mb-1">Salary Range</p>
               <p className="text-lg font-semibold text-blue-900">
-                {formatSalary(job.salaryMin, job.salaryMax)}
+                MMK {job.salaryMin} - {job.salaryMax}
               </p>
             </div>
             <div className="bg-purple-50 p-4 rounded-xl shadow-sm">
@@ -122,12 +105,6 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
               <p className="text-gray-500 text-sm mb-1">Application Deadline</p>
               <p className="font-semibold">{formatDate(job.deadline)}</p>
             </div>
-            <a
-              href={`mailto:${job.applicationEmail}`}
-              className="mt-4 sm:mt-0 inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-3 px-6 rounded-lg transition-all shadow"
-            >
-              Apply Now
-            </a>
           </div>
         </>
       )}

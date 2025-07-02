@@ -3,7 +3,7 @@ import { Briefcase } from "lucide-react";
 import Link from "next/link"; // components/layout/Footer.tsx
 export const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-gray-400">
+    <footer className=" bg-gradient-to-t from-gray-300 to-gray-600  dark:bg-gray-900 dark:text-gray-400">
       <div className="max-w-7xl mx-auto pl-16 pr-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 py-16">
           <div>

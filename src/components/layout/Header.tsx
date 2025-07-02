@@ -36,7 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { authentication, signOut } = useAuth();
+  const { authentication, signOut, role } = useAuth();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   // Instead of directly signing up, show the register modal.
@@ -93,13 +93,25 @@ export const Header = () => {
             {/* User Authentication Actions */}
             {authentication ? (
               <>
-                <Link
-                  href="/employer"
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
-                >
-                  <User size={18} />
-                  <span>Management</span>
-                </Link>
+                {role === "EMPLOYER" && (
+                  <Link
+                    href="/employer/job-listing"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                  >
+                    <User size={18} />
+                    <span>Management</span>
+                  </Link>
+                )}
+
+                {role === "JOBSEEKER" && (
+                  <Link
+                    href="/jobseeker/profile"
+                    className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                  >
+                    <User size={18} />
+                    <span>Management</span>
+                  </Link>
+                )}
                 <button
                   onClick={signOut}
                   className="flex items-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"

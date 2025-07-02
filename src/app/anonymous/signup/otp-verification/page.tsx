@@ -41,9 +41,9 @@ export default function OTPVerificationPage() {
       setAuthentication(cookieData);
 
       if (result.role === "JOBSEEKER") {
-        router.push("/jobseeker");
+        router.push("/jobseeker/profile");
       } else if (result.role === "EMPLOYER") {
-        router.push("/employer");
+        router.push("/employer/job-listing");
       } else {
         router.push("/admin");
       } // Redirect to success page

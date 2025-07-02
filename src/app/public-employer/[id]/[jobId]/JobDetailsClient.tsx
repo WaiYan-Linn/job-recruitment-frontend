@@ -1,150 +1,297 @@
-// app/public-employer/[id]/[jobId]/JobDetailsClient.tsx
 "use client";
 
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   HiOutlineLocationMarker,
   HiOutlineBriefcase,
   HiOutlineCalendar,
-  HiOutlineCurrencyDollar,
   HiOutlineMail,
   HiOutlineClipboardList,
   HiOutlineCheckCircle,
+  HiOutlineChevronLeft,
 } from "react-icons/hi";
-import { motion } from "framer-motion";
+import { useAccessToken } from "@/model/stores/use-accessToken";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import {
+  applyToJob,
+  checkApplication,
+} from "@/model/clients/application-client";
+
+// Type for the part of your JWT payload that has `role`
+interface TokenPayload {
+  rol: string;
+}
 
 type Job = Awaited<
   ReturnType<typeof import("@/model/clients/job-client").fetchJobsById>
 >;
 
+// A minimal Modal stub—you can swap for your real one
+function Modal({
+  children,
+  onClose,
+}: {
+  children: React.ReactNode;
+  onClose(): void;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg w-96 relative p-6">
+        {children}
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function JobDetailsClient({ job }: { job: Job }) {
-  const fadeIn = { opacity: [0, 1], y: [10, 0] };
-  const commonProps = { transition: { duration: 0.25 } };
+  const token = useAccessToken((s) => s.accessToken);
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  // Decode role directly from token
+  const [role, setRole] = useState<string | null>(null);
+  useEffect(() => {
+    if (!token) {
+      setRole(null);
+      return;
+    }
+    try {
+      const decoded = jwtDecode<TokenPayload>(token);
+      setRole(decoded.rol);
+      const checkStatus = async () => {
+        const applied = await checkApplication(job.id); // Pass the correct jobId
+        setHasApplied(applied);
+      };
+
+      checkStatus();
+    } catch {
+      setRole(null);
+    }
+  }, [token, hasApplied]);
+
+  // UI state
+
+  const handleApplyClick = () => {
+    if (!token) {
+      return setShowLoginModal(true);
+    }
+    if (role !== "ROLE_JOBSEEKER") {
+      console.log(role);
+      return toast.error("Only job-seekers can apply.");
+    }
+    setShowUploadModal(true);
+  };
+
+  const submitApplication = async () => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
+      return toast.error("Please select your resume file.");
+    }
+    const formData = new FormData();
+    formData.append("resumeFile", file);
+
+    setUploading(true);
+    try {
+      const message = await applyToJob(job.id, file);
+      toast.success(message); // "Application submitted successfully"
+      setHasApplied(true);
+      setShowUploadModal(false);
+    } catch (err: any) {
+      toast.error("Failed to apply: " + (err.response?.data || err.message));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
-    <>
-      {/* Hero */}
-      <header className="relative bg-gradient-to-r from-indigo-600 via-purple-500 to-blue-500 text-white py-16 px-6 md:px-12 rounded-b-3xl shadow-lg mb-12">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
+    <div className="bg-gray-100 min-h-screen dark:bg-gradient-to-r dark:from-gray-900 via-white dark:to-gray-800 shadow-lg">
+      {/* Back Link */}
+      <nav className="max-w-4xl mx-auto px-6 py-4">
+        <Link
+          href="/public-employer"
+          className="inline-flex items-center text-gray-700 hover:text-indigo-600"
+        >
+          <HiOutlineChevronLeft className="mr-2 text-xl" />
+          <span className="font-medium">Back to Job Listings</span>
+        </Link>
+      </nav>
+
+      {/* Header */}
+      <header className="bg-gradient-to-r from-indigo-300 via-white/50 to-blue-500 shadow-md rounded-b-3xl">
+        <div className="max-w-4xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           <img
             src={`http://localhost:8080${job.employer.profilePictureUrl}`}
             alt={job.employer.companyName}
-            className="w-28 h-28 rounded-full border-4 border-white object-cover shadow-2xl"
+            className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-2 border-indigo-500"
           />
-          <div className="text-center md:text-left">
-            <h1 className="text-5xl font-extrabold leading-tight">
-              {job.title}
-            </h1>
-            <p className="mt-2 text-xl opacity-90">
-              {job.employer.companyName}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
-              {[
-                { label: job.location, Icon: HiOutlineLocationMarker },
-                { label: job.jobType, Icon: HiOutlineBriefcase },
-                { label: job.workMode, Icon: HiOutlineCalendar },
-              ].map(({ label, Icon }) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-1 bg-white bg-opacity-20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium"
-                >
-                  <Icon /> {label}
-                </span>
-              ))}
+          <div className="md:col-span-2 space-y-2">
+            <h1 className="text-3xl font-bold text-gray-800">{job.title}</h1>
+            <p className="text-lg text-gray-600">{job.employer.companyName}</p>
+            <div className="flex flex-wrap gap-3 mt-2">
+              <Badge icon={<HiOutlineLocationMarker />} text={job.location} />
+              <Badge icon={<HiOutlineBriefcase />} text={job.jobType} />
+              <Badge icon={<HiOutlineCalendar />} text={job.workMode} />
             </div>
           </div>
         </div>
-        <Link
-          href={`mailto:${job.applicationEmail}`}
-          className="absolute right-7 bottom-3 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition"
-        >
-          Apply Now
-        </Link>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 space-y-12">
-        {/* Job Details */}
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={{ hidden: fadeIn, visible: { opacity: 1, y: 0 } }}
-          transition={commonProps.transition}
-          className="bg-white rounded-2xl shadow-md p-8"
-        >
-          <h2 className="text-2xl font-semibold mb-4 border-b-2 border-indigo-300 pb-1">
-            Job Details
-          </h2>
-          <ul className="space-y-2 text-slate-700">
-            <li>
-              <strong>Category:</strong> {job.category}
-            </li>
-            <li>
-              <strong>Experience:</strong> {job.experience}
-            </li>
-            <li>
-              <strong>Salary:</strong> MMK {job.salaryMin.toLocaleString()} –{" "}
-              {job.salaryMax.toLocaleString()}
-            </li>
-            <li>
-              <strong>Deadline:</strong>{" "}
-              {new Date(job.deadline).toLocaleDateString()}
-            </li>
-            <li>
-              <strong>Apply by Email:</strong>{" "}
-              <a
-                href={`mailto:${job.applicationEmail}`}
-                className="text-indigo-600 underline"
-              >
-                <HiOutlineMail className="inline mr-1" />
-                {job.applicationEmail}
-              </a>
-            </li>
-          </ul>
-        </motion.section>
+      {/* Main */}
+      <main className="max-w-5xl mx-auto py-12 grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Sidebar */}
+        <aside className="space-y-6 lg:col-span-2">
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Job Details
+            </h2>
+            <ul className="space-y-3 text-gray-700">
+              <DetailItem label="Category" value={job.category} />
+              <DetailItem label="Experience" value={job.experience} />
+              <DetailItem
+                label="Salary"
+                value={`MMK ${job.salaryMin.toLocaleString()} – ${job.salaryMax.toLocaleString()}`}
+              />
+              <DetailItem
+                label="Deadline"
+                value={new Date(job.deadline).toLocaleDateString()}
+              />
+              <li className="flex items-center gap-2">
+                <HiOutlineMail className="text-indigo-500 text-lg" />
+                <Link
+                  href={`mailto:${job.applicationEmail}`}
+                  className="text-indigo-600 underline"
+                >
+                  {job.applicationEmail}
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div className="sticky top-20">
+            <button
+              onClick={handleApplyClick}
+              disabled={hasApplied}
+              className={`block w-full text-center font-semibold py-3 rounded-xl shadow ${
+                hasApplied
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+              }`}
+            >
+              {hasApplied ? "Applied" : "Apply Now"}
+            </button>
+          </div>
+        </aside>
 
-        {/* Rich Text Sections */}
-        {[
-          {
-            title: "Description",
-            Icon: HiOutlineClipboardList,
-            content: job.description,
-          },
-          {
-            title: "Requirements",
-            Icon: HiOutlineCheckCircle,
-            content: job.requirements,
-          },
-          {
-            title: "Benefits",
-            Icon: HiOutlineCheckCircle,
-            content: job.benefits,
-          },
-        ].map(({ title, Icon, content }, i) => (
-          <motion.section
-            key={title}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.25, delay: i * 0.1 }}
-            className="bg-white rounded-2xl shadow-sm p-6"
-          >
-            <h3 className="text-xl font-semibold flex items-center gap-2 mb-3">
-              <Icon className="text-indigo-500" /> {title}
-            </h3>
-            <p className="text-slate-700 leading-relaxed whitespace-pre-line">
-              {content}
-            </p>
-          </motion.section>
-        ))}
+        {/* Content */}
+        <section className="lg:col-span-3 space-y-10">
+          <ContentBlock
+            title="Description"
+            icon={<HiOutlineClipboardList />}
+            content={job.description}
+          />
+          <ContentBlock
+            title="Requirements"
+            icon={<HiOutlineCheckCircle />}
+            content={job.requirements}
+          />
+          <ContentBlock
+            title="Benefits"
+            icon={<HiOutlineCheckCircle />}
+            content={job.benefits}
+          />
+        </section>
       </main>
 
-      {/* Sticky Apply CTA */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-8 py-4 rounded-full shadow-2xl hover:scale-105 transition">
-        <Link href={`mailto:${job.applicationEmail}`} className="font-semibold">
-          📧 Apply Now
-        </Link>
-      </div>
-    </>
+      {/* Login Modal */}
+      {showLoginModal && (
+        <Modal onClose={() => setShowLoginModal(false)}>
+          <h2 className="text-xl mb-4">Please Log In</h2>
+          <button
+            onClick={() => router.push("/anonymous/signin")}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Go to Login
+          </button>
+        </Modal>
+      )}
+
+      {/* Upload CV Modal */}
+      {showUploadModal && (
+        <Modal onClose={() => setShowUploadModal(false)}>
+          <h2 className="text-xl mb-4">Upload Your CV</h2>
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx"
+            ref={fileInputRef}
+            className="mb-4"
+          />
+          <button
+            onClick={submitApplication}
+            disabled={uploading}
+            className={`px-4 py-2 rounded ${
+              uploading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700 text-white"
+            }`}
+          >
+            {uploading ? "Submitting…" : "Submit Application"}
+          </button>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <span className="flex items-center gap-1 bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">
+      {icon}
+      <span>{text}</span>
+    </span>
+  );
+}
+
+function DetailItem({ label, value }: { label: string; value: string }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span className="font-medium text-gray-800 w-28">{label}:</span>
+      <span>{value}</span>
+    </li>
+  );
+}
+
+function ContentBlock({
+  title,
+  icon,
+  content,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  content: string;
+}) {
+  return (
+    <div className="bg-white p-8 rounded-2xl shadow">
+      <h3 className="flex items-center gap-3 text-2xl font-semibold text-gray-800 mb-4">
+        {icon}
+        <span>{title}</span>
+      </h3>
+      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+        {content}
+      </p>
+    </div>
   );
 }
