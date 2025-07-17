@@ -19,40 +19,41 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
+import {
+  fetchAllApplication,
+  fetchApplicationsForJob,
+} from "@/model/clients/application-client";
+import {
+  ApplicationStatus,
+  EmployerCandidateViewDto,
+} from "@/model/domains/candidate.domain";
+import { useAccessToken } from "@/model/stores/use-accessToken";
 
-// Type definitions
-interface Candidate {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string;
-  jobId: string;
-  jobTitle: string;
-  appliedAt: string; // ISO date string
-  status: "new" | "reviewed" | "interview" | "hired" | "rejected";
-  skills: string[];
-}
-
-interface GlobalCandidatesPageProps {}
-
-export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [filtered, setFiltered] = useState<Candidate[]>([]);
+export default function GlobalCandidatesPage() {
+  const [candidates, setCandidates] = useState<EmployerCandidateViewDto[]>([]);
+  const [filtered, setFiltered] = useState<EmployerCandidateViewDto[]>([]);
   const [search, setSearch] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [jobFilter, setJobFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | "all">(
+    "all"
+  );
+  const [jobFilter, setJobFilter] = useState<number | "all">("all");
 
-  // Fetch candidates on mount
+  const router = useRouter();
+  const token = useAccessToken((s) => s.accessToken);
+
   useEffect(() => {
-    fetch("/api/employer/candidates")
-      .then((res) => res.json())
-      .then((data: Candidate[]) => {
+    if (!token) return;
+    async function load() {
+      if (jobFilter === "all") {
+        const data = await fetchAllApplication();
         setCandidates(data);
-        setFiltered(data);
-      });
-  }, []);
+      }
+    }
+    load();
+  }, [jobFilter, token]);
 
-  // Filter logic
+  // Apply search and status filters on loaded candidates
   useEffect(() => {
     let temp = [...candidates];
 
@@ -60,19 +61,15 @@ export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
       const term = search.toLowerCase();
       temp = temp.filter(
         (c) =>
-          c.name.toLowerCase().includes(term) ||
+          c.jobSeekerName.toLowerCase().includes(term) ||
           c.skills.some((skill) => skill.toLowerCase().includes(term))
       );
     }
     if (statusFilter !== "all") {
       temp = temp.filter((c) => c.status === statusFilter);
     }
-    if (jobFilter !== "all") {
-      temp = temp.filter((c) => c.jobId === jobFilter);
-    }
-
     setFiltered(temp);
-  }, [search, statusFilter, jobFilter, candidates]);
+  }, [search, statusFilter, candidates]);
 
   return (
     <div className="p-6 lg:p-10 bg-gradient-to-r from-white via-gray-50 to-gray-100 min-h-screen">
@@ -80,7 +77,7 @@ export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
         Candidate Dashboard
       </h1>
 
-      <Card className="mb-8 shadow-lg  rounded-2xl">
+      <Card className="mb-8 shadow-lg rounded-2xl">
         <CardContent className="flex flex-wrap gap-6 items-center justify-center mt-4">
           <Input
             placeholder="🔍 Search by name or skill..."
@@ -89,33 +86,36 @@ export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
             className="flex-1 min-w-[220px] bg-gray-100"
           />
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter}>
             <SelectTrigger className="w-[160px] bg-gray-100">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="new">New</SelectItem>
-              <SelectItem value="reviewed">Reviewed</SelectItem>
-              <SelectItem value="interview">Interview</SelectItem>
-              <SelectItem value="hired">Hired</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="NEW">New</SelectItem>
+              <SelectItem value="REVIEWED">Reviewed</SelectItem>
+              <SelectItem value="INTERVIEW">Interview</SelectItem>
+              <SelectItem value="HIRED">Hired</SelectItem>
+              <SelectItem value="REJECTED">Rejected</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select value={jobFilter} onValueChange={setJobFilter}>
+          <Select
+            value={jobFilter.toString()}
+            onValueChange={(v) => setJobFilter(v === "all" ? "all" : Number(v))}
+          >
             <SelectTrigger className="w-[240px] bg-gray-100">
               <SelectValue placeholder="All Jobs" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Jobs</SelectItem>
-              {/* TODO: Dynamically populate with job list */}
+              {/* TODO: Dynamically list unique jobIds and titles from candidates */}
             </SelectContent>
           </Select>
 
           <Button
             onClick={() => {
-              /* TODO: Bulk actions handler */
+              /* Bulk actions */
             }}
             className="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full shadow-md"
           >
@@ -124,6 +124,7 @@ export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
         </CardContent>
       </Card>
 
+      {/* Candidates Table */}
       <div className="overflow-x-auto rounded-2xl shadow-lg">
         <Table className="min-w-full bg-white rounded-2xl">
           <TableHeader>
@@ -138,20 +139,25 @@ export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
           <TableBody>
             {filtered.map((c, idx) => (
               <TableRow
-                key={c.id}
-                className={`hover:bg-gray-50 transition-colors ${
+                key={c.applicationId}
+                onClick={() =>
+                  router.push(`/employer/candidates/${c.applicationId}`)
+                }
+                className={`cursor-pointer hover:bg-gray-50 transition-colors ${
                   idx % 2 === 0 ? "bg-white" : "bg-gray-50"
                 }`}
               >
                 <TableCell>
                   <div className="flex items-center gap-4">
                     <img
-                      src={c.avatarUrl}
-                      alt={c.name}
+                      src={c.profilePictureUrl || undefined}
+                      alt={c.jobSeekerName}
                       className="w-12 h-12 rounded-full object-cover border-2 border-blue-200"
                     />
                     <div>
-                      <p className="font-semibold text-gray-800">{c.name}</p>
+                      <p className="font-semibold text-gray-800">
+                        {c.jobSeekerName}
+                      </p>
                       <p className="text-sm text-gray-500">{c.email}</p>
                     </div>
                   </div>
@@ -164,20 +170,12 @@ export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
                 </TableCell>
                 <TableCell>
                   <Badge variant="default" className="px-3 py-1 text-sm">
-                    {capitalize(c.status)}
+                    {c.status.charAt(0).toUpperCase() +
+                      c.status.slice(1).toLowerCase()}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      (window.location.href = `/candidates/${c.id}`)
-                    }
-                    className="px-4 py-1 rounded-full"
-                  >
-                    View
-                  </Button>
+                  {/* Empty, row click handles navigation */}
                 </TableCell>
               </TableRow>
             ))}
@@ -186,28 +184,4 @@ export default function GlobalCandidatesPage({}: GlobalCandidatesPageProps) {
       </div>
     </div>
   );
-}
-
-// Utility functions
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function statusVariant(
-  status: Candidate["status"]
-): "secondary" | "outline" | "destructive" | "default" | "warning" {
-  switch (status) {
-    case "new":
-      return "secondary";
-    case "reviewed":
-      return "outline";
-    case "interview":
-      return "destructive";
-    case "hired":
-      return "default";
-    case "rejected":
-      return "warning";
-    default:
-      return "default";
-  }
 }
