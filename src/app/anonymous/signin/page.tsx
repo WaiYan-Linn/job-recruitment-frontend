@@ -47,13 +47,7 @@ export default function SigninPage() {
     <div className="flex min-h-screen items-center justify-center dark:from-gray-800 dark:to-gray-900 bg-gradient-to-br  from-gray-200 via-indigo-500 to-blue-400  ">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          {/* Replace with your logo */}
-          <img
-            className="mx-auto h-12 w-auto"
-            src="/logo.svg"
-            alt="Your Logo"
-          />
-          <h2 className="mt-6 text-3xl font-extrabold text-white">
+          <h2 className="mt-16 text-3xl font-extrabold text-white">
             Welcome Back!
           </h2>
           <p className="mt-2 text-sm text-white">Sign in to your account</p>
@@ -116,31 +110,6 @@ export default function SigninPage() {
                 {errors.password.message}
               </p>
             )}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember_me"
-                name="remember_me"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember_me"
-                className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-              >
-                Remember me
-              </label>
-            </div>
-            <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-gray-700 dark:text-gray-300  hover:text-indigo-500"
-              >
-                Forgot your password?
-              </a>
-            </div>
           </div>
 
           <div>

@@ -48,6 +48,7 @@ export interface JobListing {
     id: number;
     name: string;
   };
+  closed: boolean;
 }
 
 export interface JobDetails {
@@ -67,6 +68,7 @@ export interface JobDetails {
   applicationEmail: string;
   postedAt: string; // LocalDate -> ISO string
   employer: EmployerDTO;
+  closed: boolean;
 }
 
 export interface JobDetailsByIdProps {
@@ -83,6 +85,7 @@ export interface PageResult<T> {
 export type JobDetailsWithStatus = {
   jobDetails: JobDetails;
   hasApplied: boolean;
+  overDeadline: boolean;
 };
 
 export interface FetchJobParams {

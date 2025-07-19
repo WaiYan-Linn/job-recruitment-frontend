@@ -63,11 +63,12 @@ export default function JobsPage() {
 
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-6">
-          {jobs.map(({ jobDetails, hasApplied }) => (
+          {jobs.map(({ jobDetails, hasApplied, overDeadline }) => (
             <JobCard
               key={jobDetails.id}
               jobDetails={jobDetails}
               hasApplied={hasApplied}
+              overDeadline={overDeadline}
             />
           ))}
         </div>

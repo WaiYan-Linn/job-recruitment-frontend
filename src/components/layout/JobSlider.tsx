@@ -18,6 +18,7 @@ const JobSlider = () => {
         const data = await fetchJobsByMaxSalaires(0, 5); // fetch top 5 high salary jobs
         const jobs = Array.isArray(data?.contents) ? data.contents : [];
         setJobs(jobs);
+        console.log(data);
       } catch (error) {
         console.error("Failed to load jobs:", error);
       }

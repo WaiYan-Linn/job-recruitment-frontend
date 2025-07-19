@@ -45,6 +45,7 @@ import {
 import { set } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import JobCard from "@/components/layout/JobCard";
+import { useAccessToken } from "@/model/stores/use-accessToken";
 
 const App = () => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -141,6 +142,7 @@ const App = () => {
   ];
 
   const [featuredJobs, setFeaturedJobs] = useState<JobDetailsWithStatus[]>([]);
+  const token = useAccessToken((s) => s.accessToken);
 
   useEffect(() => {
     async function loadJobs() {
@@ -164,7 +166,7 @@ const App = () => {
     }
 
     loadJobs();
-  }, []);
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-indigo-100 via-purple-600 to-blue-100">
@@ -289,11 +291,12 @@ const App = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {featuredJobs.map(({ jobDetails, hasApplied }) => (
+              {featuredJobs.map(({ jobDetails, hasApplied, overDeadline }) => (
                 <JobCard
                   key={jobDetails.id}
                   jobDetails={jobDetails}
                   hasApplied={hasApplied}
+                  overDeadline={overDeadline}
                 />
               ))}
             </div>

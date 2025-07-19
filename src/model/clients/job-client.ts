@@ -37,3 +37,7 @@ export async function fetchJobWithParams({
   });
   return res.data;
 }
+
+export async function closeJobs(id: number) {
+  return (await client.patch(`/jobs/${id}/close`)).data;
+}

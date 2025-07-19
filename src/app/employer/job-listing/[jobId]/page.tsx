@@ -1,6 +1,7 @@
 "use client";
 import { JobDetails, JobDetailsByIdProps } from "@/model/domains/job.domain";
 import { fetchJobsById } from "@/model/clients/job-client";
+import { closeJobs } from "@/model/clients/job-client";
 import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import { use } from "react";
@@ -70,7 +71,9 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
 
           {/* Details Tab */}
           <TabsContent value="DETAILS" className="pt-4 space-y-6">
+            <div className="mb-6 flex items-center gap-4"></div>
             <div className="flex flex-col md:flex-row md:items-center justify-between">
+              {/* LEFT SIDE - Company Info */}
               <div className="flex items-center gap-4">
                 <img
                   src={
@@ -88,6 +91,19 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
                     {job.employer.companyName} · {job.location}
                   </p>
                 </div>
+              </div>
+
+              {/* RIGHT SIDE - Job Status Badge */}
+              <div className="mt-4 md:mt-0">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    job.closed
+                      ? "bg-red-100 text-red-700"
+                      : "bg-blue-100 text-blue-700"
+                  }`}
+                >
+                  {job.closed ? "Closed" : "Open"}
+                </span>
               </div>
             </div>
 
@@ -120,9 +136,27 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
             <Section title="Requirements" content={job.requirements} />
             <Section title="Benefits" content={job.benefits} />
 
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-gray-500 text-sm mb-1">Application Deadline</p>
-              <p className="font-semibold">{formatDate(job.deadline)}</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <div className="pt-4 border-t border-gray-200">
+                <p className="text-gray-500 text-sm mb-1">
+                  Application Deadline
+                </p>
+                <p className="font-semibold">{formatDate(job.deadline)}</p>
+              </div>
+              <button
+                disabled={job.closed === true}
+                className="ml-4 mt-8 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-400 text-white font-semibold hover:bg-blue-800  transition disabled:opacity-50"
+                onClick={async () => {
+                  try {
+                    await closeJobs(job.id);
+                    setJob({ ...job, closed: !job.closed });
+                  } catch (err) {
+                    // Optionally show error
+                  }
+                }}
+              >
+                {job.closed ? "Closed" : "Close Job"}
+              </button>
             </div>
           </TabsContent>
 

@@ -80,20 +80,34 @@ export default function JobListingPage() {
                   )}
 
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-gray-800">
-                      {job.title}
-                    </h3>
-                    <p className="text-gray-600">{job.employer.name}</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                        {job.location}
-                      </span>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                        {job.jobType}
-                      </span>
-                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                        {job.workMode}
-                      </span>
+                    <div>
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className="font-semibold text-lg text-gray-800">
+                          {job.title}
+                        </h3>
+                        <span
+                          className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                            job.closed
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-100 text-blue-700"
+                          }`}
+                        >
+                          {job.closed ? "Closed" : "Open"}
+                        </span>
+                      </div>
+
+                      <p className="text-gray-600">{job.employer.name}</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                          {job.location}
+                        </span>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                          {job.jobType}
+                        </span>
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                          {job.workMode}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex justify-between mt-3 text-sm">
                       <span className="text-gray-600">

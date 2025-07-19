@@ -19,6 +19,7 @@ import {
   applyToJob,
   checkApplication,
 } from "@/model/clients/application-client";
+import { set } from "react-hook-form";
 
 // Type for the part of your JWT payload that has `role`
 interface TokenPayload {
@@ -59,6 +60,7 @@ export default function JobDetailsClient({ job }: { job: Job }) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
+  const [overDeadline, setOverDeadline] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -74,15 +76,18 @@ export default function JobDetailsClient({ job }: { job: Job }) {
       const decoded = jwtDecode<TokenPayload>(token);
       setRole(decoded.rol);
       const checkStatus = async () => {
-        const applied = await checkApplication(job.id); // Pass the correct jobId
-        setHasApplied(applied);
+        if (decoded.rol === "ROLE_JOBSEEKER") {
+          const applied = await checkApplication(job.id); // Pass the correct jobId
+          setHasApplied(applied);
+        }
       };
+      setOverDeadline(new Date(job.deadline) < new Date());
 
       checkStatus();
     } catch {
       setRole(null);
     }
-  }, [token, hasApplied]);
+  }, [token, hasApplied, overDeadline]);
 
   // UI state
 
@@ -184,14 +189,20 @@ export default function JobDetailsClient({ job }: { job: Job }) {
           <div className="sticky top-20">
             <button
               onClick={handleApplyClick}
-              disabled={hasApplied}
+              disabled={hasApplied || overDeadline || job.closed}
               className={`block w-full text-center font-semibold py-3 rounded-xl shadow ${
-                hasApplied
+                hasApplied || overDeadline || job.closed
                   ? "bg-gray-400 cursor-not-allowed text-white"
                   : "bg-indigo-600 text-white hover:bg-indigo-700"
               }`}
             >
-              {hasApplied ? "Applied" : "Apply Now"}
+              {hasApplied
+                ? "Applied"
+                : job.closed
+                ? "Closed"
+                : overDeadline
+                ? "Deadline Passed"
+                : "Apply Now"}
             </button>
           </div>
         </aside>
