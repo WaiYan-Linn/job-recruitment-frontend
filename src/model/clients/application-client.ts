@@ -1,7 +1,10 @@
 import axios from "axios";
 import { BASE_URL, client } from "../utils";
 import { ApplicationResponseDto } from "../domains/application.domain";
-import { EmployerCandidateViewDto } from "../domains/candidate.domain";
+import {
+  ApplicationStatus,
+  EmployerCandidateViewDto,
+} from "../domains/candidate.domain";
 
 export async function checkApplication(id: number) {
   return (await client.get(`/app/${id}/has-applied`)).data;
@@ -20,15 +23,20 @@ export async function applyToJob(jobId: number, file: File): Promise<string> {
   return response.data; // e.g., "Application submitted successfully"
 }
 
-export async function fetchApplicationsForJob(jobId: number) : Promise<ApplicationResponseDto[]>{
+export async function fetchApplicationsForJob(
+  jobId: number
+): Promise<ApplicationResponseDto[]> {
   return (await client.get(`/employer/applications/${jobId}`)).data;
 }
 
-export async function fetchAllApplication():Promise<EmployerCandidateViewDto[]>{
+export async function fetchAllApplication(): Promise<
+  EmployerCandidateViewDto[]
+> {
   return (await client.get(`/employer/applications`)).data;
-
 }
-export async function fetchApplicationDetails(id:number) : Promise<EmployerCandidateViewDto>{
+export async function fetchApplicationDetails(
+  id: number
+): Promise<EmployerCandidateViewDto> {
   return (await client.get(`/employer/applications/details/${id}`)).data;
 }
 export async function previewResume(applicationId: number): Promise<void> {
@@ -48,3 +56,22 @@ export async function previewResume(applicationId: number): Promise<void> {
   }
 }
 
+export async function updateApplicationStatus(
+  applicationId: number,
+  status: ApplicationStatus
+): Promise<void> {
+  await client.patch(`/employer/applications/${applicationId}/status`, null, {
+    params: { status },
+  });
+}
+
+export async function scheduleInterview(
+  applicationId: number,
+  data: {
+    dateTime: string; // ISO string: e.g., "2025-07-21T14:30"
+    location: string;
+    notes?: string;
+  }
+): Promise<void> {
+  await client.post(`/employer/applications/${applicationId}/interview`, data);
+}

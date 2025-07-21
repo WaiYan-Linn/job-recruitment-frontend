@@ -68,6 +68,8 @@ export default function JobDetailsClient({ job }: { job: Job }) {
   // Decode role directly from token
   const [role, setRole] = useState<string | null>(null);
   useEffect(() => {
+    setOverDeadline(new Date(job.deadline) < new Date());
+
     if (!token) {
       setRole(null);
       return;

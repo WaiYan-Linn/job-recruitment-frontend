@@ -50,19 +50,15 @@ export const Footer = () => {
                   Browse Jobs
                 </button>
               </li>
+
               <li>
                 <button className="hover:text-white transition-colors">
-                  Career Advice
+                  Upload CV
                 </button>
               </li>
               <li>
                 <button className="hover:text-white transition-colors">
-                  Jobs Category
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-white transition-colors">
-                  Profile
+                  Setting Profile
                 </button>
               </li>
             </ul>
@@ -85,12 +81,7 @@ export const Footer = () => {
               </li>
               <li>
                 <button className="hover:text-white transition-colors">
-                  Pricing Plans
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-white transition-colors">
-                  Recruitment Tools
+                  Manage Jobs
                 </button>
               </li>
             </ul>
