@@ -3,7 +3,7 @@ import { JobDetails, JobDetailsByIdProps } from "@/model/domains/job.domain";
 import { fetchJobsById } from "@/model/clients/job-client";
 import { closeJobs } from "@/model/clients/job-client";
 import { useState, useEffect } from "react";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { use } from "react";
 import { useProfileStore } from "@/model/stores/profile-picture";
 import { ApplicationResponseDto } from "@/model/domains/application.domain";
@@ -27,6 +27,7 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
 
   const profilePicture = useProfileStore((s) => s.profilePicture);
   const token = useAccessToken((s) => s.accessToken);
+  const router = useRouter();
 
   useEffect(() => {
     if (!token || isNaN(id)) return;
@@ -175,7 +176,7 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
               <Tabs defaultValue="ALL" className="space-y-6">
                 {/* Custom Stylish Tab Buttons */}
                 <TabsList className="flex gap-3 p-2 bg-transparent mt-6">
-                  {["ALL", "PENDING", "ACCEPTED"].map((tab) => (
+                  {["ALL", "INTERVIEW", "HIRED"].map((tab) => (
                     <TabsTrigger
                       key={tab}
                       value={tab}
@@ -191,7 +192,7 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
                 </TabsList>
 
                 {/* Tab Panels */}
-                {["ALL", "PENDING", "ACCEPTED"].map((status) => (
+                {["ALL", "INTERVIEW", "HIRED"].map((status) => (
                   <TabsContent
                     key={status}
                     value={status}
@@ -226,15 +227,6 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
                             </div>
 
                             <div className="flex items-center gap-3">
-                              <button
-                                onClick={() => previewResume(app.id)}
-                                className="px-4 py-2 text-sm font-semibold rounded-lg bg-white shadow-md transition duration-300 hover:shadow-lg hover:scale-105"
-                              >
-                                <span className="bg-gradient-to-r from-blue-600 to-purple-500 bg-clip-text text-transparent">
-                                  Download Resume
-                                </span>
-                              </button>
-
                               <span
                                 className={`px-2 py-1 rounded text-sm font-medium
                         ${
@@ -247,6 +239,25 @@ export default function JobDetailsById({ params }: JobDetailsByIdProps) {
                               >
                                 {app.status}
                               </span>
+                              <button
+                                onClick={() => previewResume(app.id)}
+                                className="px-4 py-2 text-sm font-semibold rounded-lg bg-white shadow-md transition duration-300 hover:shadow-lg hover:scale-105"
+                              >
+                                <span className="bg-gradient-to-r from-blue-600 to-purple-500 bg-clip-text text-transparent">
+                                  Download Resume
+                                </span>
+                              </button>
+
+                              <button
+                                onClick={() =>
+                                  router.push(`/employer/candidates/${app.id}`)
+                                }
+                                className="px-4 py-2 text-sm font-semibold rounded-lg bg-white shadow-md transition duration-300 hover:shadow-lg hover:scale-105"
+                              >
+                                <span className="bg-gradient-to-r from-blue-600 to-purple-500 bg-clip-text text-transparent">
+                                  View
+                                </span>
+                              </button>
                             </div>
                           </li>
                         ))}

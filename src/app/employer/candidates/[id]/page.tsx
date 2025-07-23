@@ -8,7 +8,9 @@ import {
 } from "@/model/domains/candidate.domain";
 import {
   fetchApplicationDetails,
+  hire,
   previewResume,
+  reject,
   updateApplicationStatus,
 } from "@/model/clients/application-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +37,8 @@ import {
   FileText,
   Clock,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import { InterviewDetails } from "@/model/domains/application.domain";
 
 export default function CandidateDetailPage() {
   const { id } = useParams();
@@ -47,12 +51,11 @@ export default function CandidateDetailPage() {
     hire: false,
     reject: false,
   });
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<InterviewDetails>({
     dateTime: "",
     location: "",
     notes: "",
   });
-
   const token = useAccessToken((s) => s.accessToken);
 
   const setLoadingState = (
@@ -69,6 +72,7 @@ export default function CandidateDetailPage() {
       await updateStatus("INTERVIEW");
       setOpen(false);
       setForm({ dateTime: "", location: "", notes: "" }); // Reset form
+      toast.success("Interview scheduled successfully");
     } catch (error) {
       console.error("Error scheduling interview:", error);
       // You might want to show an error toast here
@@ -80,7 +84,9 @@ export default function CandidateDetailPage() {
   const handleHire = async () => {
     setLoadingState("hire", true);
     try {
+      await hire(applicationId);
       await updateStatus("HIRED");
+      toast.success("Candidate hired successfully");
     } catch (error) {
       console.error("Error hiring candidate:", error);
     } finally {
@@ -91,7 +97,9 @@ export default function CandidateDetailPage() {
   const handleReject = async () => {
     setLoadingState("reject", true);
     try {
+      await reject(applicationId);
       await updateStatus("REJECTED");
+      toast.success("Candidate rejected successfully");
     } catch (error) {
       console.error("Error rejecting candidate:", error);
     } finally {
@@ -116,7 +124,7 @@ export default function CandidateDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "pending":
+      case "new":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "interview":
         return "bg-blue-100 text-blue-800 border-blue-200";
@@ -275,8 +283,8 @@ export default function CandidateDetailPage() {
       </Card>
 
       {/* Action Buttons */}
-      <Card className="shadow-lg border-0 bg-gradient-to-r from-white to-gray-50">
-        <CardContent className="p-6">
+      <Card className="shadow-lg border-0 bg-gradient-to-r from-white to-gray-50 ">
+        <CardContent className="p-6 sm:px-0 md:px-2">
           <div className="flex gap-4 justify-end">
             <Button
               onClick={() => setOpen(true)}

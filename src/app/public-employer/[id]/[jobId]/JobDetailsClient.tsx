@@ -144,6 +144,9 @@ export default function JobDetailsClient({ job }: { job: Job }) {
           <img
             src={`http://localhost:8080${job.employer.profilePictureUrl}`}
             alt={job.employer.companyName}
+            onClick={() => {
+              router.push("/public-employer/" + job.employer.id);
+            }}
             className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-2 border-indigo-500"
           />
           <div className="md:col-span-2 space-y-2">

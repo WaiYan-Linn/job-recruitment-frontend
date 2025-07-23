@@ -1,6 +1,9 @@
 import axios from "axios";
 import { BASE_URL, client } from "../utils";
-import { ApplicationResponseDto } from "../domains/application.domain";
+import {
+  ApplicationResponseDto,
+  InterviewDetails,
+} from "../domains/application.domain";
 import {
   ApplicationStatus,
   EmployerCandidateViewDto,
@@ -26,22 +29,22 @@ export async function applyToJob(jobId: number, file: File): Promise<string> {
 export async function fetchApplicationsForJob(
   jobId: number
 ): Promise<ApplicationResponseDto[]> {
-  return (await client.get(`/employer/applications/${jobId}`)).data;
+  return (await client.get(`/applications/${jobId}`)).data;
 }
 
 export async function fetchAllApplication(): Promise<
   EmployerCandidateViewDto[]
 > {
-  return (await client.get(`/employer/applications`)).data;
+  return (await client.get(`/applications`)).data;
 }
 export async function fetchApplicationDetails(
   id: number
 ): Promise<EmployerCandidateViewDto> {
-  return (await client.get(`/employer/applications/details/${id}`)).data;
+  return (await client.get(`/applications/details/${id}`)).data;
 }
 export async function previewResume(applicationId: number): Promise<void> {
   try {
-    const response = await client.get(`/employer/resume/${applicationId}`, {
+    const response = await client.get(`/applications/resume/${applicationId}`, {
       responseType: "blob",
     });
 
@@ -60,7 +63,7 @@ export async function updateApplicationStatus(
   applicationId: number,
   status: ApplicationStatus
 ): Promise<void> {
-  await client.patch(`/employer/applications/${applicationId}/status`, null, {
+  await client.patch(`/applications/${applicationId}/status`, null, {
     params: { status },
   });
 }
@@ -73,5 +76,41 @@ export async function scheduleInterview(
     notes?: string;
   }
 ): Promise<void> {
-  await client.post(`/employer/applications/${applicationId}/interview`, data);
+  await client.post(`/applications/${applicationId}/interview`, data);
+}
+
+export async function hire(applicationId: number): Promise<void> {
+  await client.post(`/applications/${applicationId}/hired`);
+}
+
+export async function reject(applicationId: number): Promise<void> {
+  await client.post(`/applications/${applicationId}/rejected`);
+}
+
+export async function getApplicationsByJob(
+  jobId: number
+): Promise<EmployerCandidateViewDto> {
+  return (
+    await client.get(`/applications/job`, {
+      params: {
+        jobId: jobId,
+      },
+    })
+  ).data;
+}
+
+export async function getApplicationsByStatus(
+  status: String
+): Promise<EmployerCandidateViewDto> {
+  return (
+    await client.get(`/applications/status`, {
+      params: { status: status },
+    })
+  ).data;
+}
+
+export async function getInterviewInfo(
+  applicationId: number
+): Promise<InterviewDetails> {
+  return (await client.get(`/applications/${applicationId}/interview`)).data;
 }
