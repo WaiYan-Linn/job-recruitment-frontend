@@ -1,6 +1,7 @@
 import axios from "axios";
 import { BASE_URL, client } from "../utils";
 import {
+  ApplicationInfo,
   ApplicationResponseDto,
   InterviewDetails,
 } from "../domains/application.domain";

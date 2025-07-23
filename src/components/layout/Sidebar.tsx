@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Plus, Users, FilePlus, Settings } from "lucide-react";
+import { Menu, X, Plus, Users, FilePlus, Settings, Inbox } from "lucide-react";
 
 // Helper to parse role from cookie
 function getUserRoleFromCookie(): string | null {
@@ -65,6 +65,12 @@ export default function Sidebar() {
       href: "/jobseeker/profile",
       icon: Users,
       label: "Profile",
+      roles: ["JOBSEEKER"],
+    },
+    {
+      href: "/jobseeker/application",
+      icon: Inbox,
+      label: "Applications",
       roles: ["JOBSEEKER"],
     },
     {

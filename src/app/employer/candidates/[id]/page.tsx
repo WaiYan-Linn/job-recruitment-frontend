@@ -12,6 +12,9 @@ import {
   previewResume,
   reject,
   updateApplicationStatus,
+  scheduleInterview,
+  // Import the new function
+  getInterviewInfo,
 } from "@/model/clients/application-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +28,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { scheduleInterview } from "@/model/clients/application-client";
 import {
   Loader2,
   Mail,
@@ -36,7 +38,9 @@ import {
   Briefcase,
   FileText,
   Clock,
-} from "lucide-react";
+  MapPin,
+  StickyNote,
+} from "lucide-react"; // Added icons
 import toast from "react-hot-toast";
 import { InterviewDetails } from "@/model/domains/application.domain";
 
@@ -56,6 +60,11 @@ export default function CandidateDetailPage() {
     location: "",
     notes: "",
   });
+  // State for interview details
+  const [interviewDetails, setInterviewDetails] =
+    useState<InterviewDetails | null>(null);
+  const [interviewDetailsLoading, setInterviewDetailsLoading] = useState(false);
+
   const token = useAccessToken((s) => s.accessToken);
 
   const setLoadingState = (
@@ -72,10 +81,12 @@ export default function CandidateDetailPage() {
       await updateStatus("INTERVIEW");
       setOpen(false);
       setForm({ dateTime: "", location: "", notes: "" }); // Reset form
+      // Fetch the newly scheduled interview details
+      await fetchInterviewDetails(applicationId);
       toast.success("Interview scheduled successfully");
     } catch (error) {
       console.error("Error scheduling interview:", error);
-      // You might want to show an error toast here
+      toast.error("Failed to schedule interview.");
     } finally {
       setLoadingState("interview", false);
     }
@@ -87,8 +98,10 @@ export default function CandidateDetailPage() {
       await hire(applicationId);
       await updateStatus("HIRED");
       toast.success("Candidate hired successfully");
+      // Note: interviewDetails state is NOT cleared here anymore
     } catch (error) {
       console.error("Error hiring candidate:", error);
+      toast.error("Failed to hire candidate.");
     } finally {
       setLoadingState("hire", false);
     }
@@ -100,26 +113,97 @@ export default function CandidateDetailPage() {
       await reject(applicationId);
       await updateStatus("REJECTED");
       toast.success("Candidate rejected successfully");
+      // Note: interviewDetails state is NOT cleared here anymore
     } catch (error) {
       console.error("Error rejecting candidate:", error);
+      toast.error("Failed to reject candidate.");
     } finally {
       setLoadingState("reject", false);
     }
   };
 
-  useEffect(() => {
-    if (!token) return;
-    async function loadDetail() {
-      const detail = await fetchApplicationDetails(applicationId);
-      setData(detail);
-      setLoading(false);
+  // Function to fetch interview details
+  const fetchInterviewDetails = async (id: number) => {
+    if (!token) return; // Ensure token is available
+    setInterviewDetailsLoading(true);
+    try {
+      const details = await getInterviewInfo(id);
+      setInterviewDetails(details);
+    } catch (error) {
+      // It's okay if interview details don't exist yet (e.g., status is NEW)
+      // Only log and toast for unexpected errors, not 404s necessarily
+      console.warn(
+        "Interview details might not exist yet or failed to load:",
+        error
+      );
+      // toast.error("Could not load interview details."); // Maybe remove this toast for 404s
+      setInterviewDetails(null); // Ensure it's cleared if not found or error
+    } finally {
+      setInterviewDetailsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (!token || !applicationId) return; // Basic checks
+
+    async function loadDetail() {
+      try {
+        const detail = await fetchApplicationDetails(applicationId);
+        setData(detail);
+        // Fetch interview details if the application *ever* had an interview scheduled
+        // We can assume this if the status was or is INTERVIEW, or just try fetching always
+        // Let's fetch if status is/was likely to have had interview details
+        // A safer bet: fetch interview details regardless of initial status,
+        // as the backend might have them even if status changed.
+        // However, to be efficient, let's fetch if the *current* status is INTERVIEW
+        // or if we know details might exist. For now, let's fetch for INTERVIEW status.
+        // You could also fetch always, but it might lead to 404s frequently.
+        if (
+          detail.status === "INTERVIEW" ||
+          detail.status === "HIRED" ||
+          detail.status === "REJECTED"
+        ) {
+          await fetchInterviewDetails(applicationId);
+        }
+      } catch (err) {
+        console.error("Error loading candidate details:", err);
+        toast.error("Failed to load candidate details.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadDetail();
-  }, [applicationId, token]);
+  }, [applicationId, token]); // Depend on applicationId and token
+
+  // Effect to handle fetching interview details when scheduling is successful
+  // This effect is triggered by changes in data.status to 'INTERVIEW'
+  useEffect(() => {
+    if (
+      data?.status === "INTERVIEW" &&
+      !interviewDetails &&
+      !interviewDetailsLoading
+    ) {
+      fetchInterviewDetails(applicationId);
+    }
+    // We no longer clear interviewDetails when status changes away from INTERVIEW
+  }, [data?.status, interviewDetails, interviewDetailsLoading, applicationId]);
 
   const updateStatus = async (status: ApplicationStatus) => {
-    await updateApplicationStatus(applicationId, status);
+    // Update local state optimistically or wait for server confirmation
     setData((prev) => prev && { ...prev, status });
+    // Optionally, you could await the API call here and then setData
+    // try {
+    //   await updateApplicationStatus(applicationId, status);
+    //   setData((prev) => prev && { ...prev, status });
+    // } catch (err) {
+    //    console.error("Error updating status:", err);
+    //    toast.error("Failed to update status.");
+    //    // Revert status if API call fails
+    //    setData((prev) => prev && { ...prev, status: data?.status ?? prev.status });
+    // }
+    // For now, assuming the parent updateStatus handles persistence
+    await updateApplicationStatus(applicationId, status);
   };
 
   const getStatusColor = (status: string) => {
@@ -174,7 +258,6 @@ export default function CandidateDetailPage() {
                 <User className="h-4 w-4 text-blue-600" />
               </div>
             </div>
-
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
@@ -197,7 +280,6 @@ export default function CandidateDetailPage() {
                     </span>
                   </div>
                 </div>
-
                 <Badge
                   className={`px-4 py-2 text-sm font-semibold border ${getStatusColor(
                     data.status
@@ -225,9 +307,61 @@ export default function CandidateDetailPage() {
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
             {data.jobTitle}
           </h3>
-          <p className="text-gray-600">{data.jobTitle}</p>
+          <p className="text-gray-600">{data.jobTitle}</p>{" "}
+          {/* Assuming jobDescription exists or use jobTitle again */}
         </CardContent>
       </Card>
+
+      {/* Interview Details Card - Shown if interviewDetails data exists */}
+      {interviewDetails && (
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Interview Details{" "}
+              <span className="text-sm text-gray-200">(Scheduled)</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm text-gray-500">Date & Time</p>
+                <p className="font-medium text-gray-800">
+                  {new Date(interviewDetails.dateTime).toLocaleString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm text-gray-500">Location</p>
+                <p className="font-medium text-gray-800">
+                  {interviewDetails.location}
+                </p>
+              </div>
+            </div>
+            {interviewDetails.notes && (
+              <div className="flex items-start gap-3">
+                <StickyNote className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-gray-500">Notes</p>
+                  <p className="font-medium text-gray-800 whitespace-pre-wrap">
+                    {interviewDetails.notes}
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Profile & Skills Card */}
       <Card className="shadow-lg border-0">
@@ -243,7 +377,6 @@ export default function CandidateDetailPage() {
               </p>
             </div>
           </div>
-
           <div>
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               Skills & Expertise
@@ -260,7 +393,6 @@ export default function CandidateDetailPage() {
               ))}
             </div>
           </div>
-
           {data.resumeUrl && (
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -285,7 +417,7 @@ export default function CandidateDetailPage() {
       {/* Action Buttons */}
       <Card className="shadow-lg border-0 bg-gradient-to-r from-white to-gray-50 ">
         <CardContent className="p-6 sm:px-0 md:px-2">
-          <div className="flex gap-4 justify-end">
+          <div className="flex gap-4 justify-end flex-wrap">
             <Button
               onClick={() => setOpen(true)}
               disabled={
@@ -308,7 +440,6 @@ export default function CandidateDetailPage() {
                 </>
               )}
             </Button>
-
             <Button
               onClick={handleHire}
               disabled={
@@ -330,7 +461,6 @@ export default function CandidateDetailPage() {
                 </>
               )}
             </Button>
-
             <Button
               onClick={handleReject}
               disabled={
@@ -365,7 +495,6 @@ export default function CandidateDetailPage() {
               Schedule Interview
             </DialogTitle>
           </DialogHeader>
-
           <div className="space-y-6 pt-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -379,7 +508,6 @@ export default function CandidateDetailPage() {
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Location
@@ -392,7 +520,6 @@ export default function CandidateDetailPage() {
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Notes (Optional)
@@ -405,7 +532,6 @@ export default function CandidateDetailPage() {
                 rows={3}
               />
             </div>
-
             <div className="flex gap-3 pt-4">
               <Button
                 onClick={() => setOpen(false)}

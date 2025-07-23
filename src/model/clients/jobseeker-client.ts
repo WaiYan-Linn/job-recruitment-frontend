@@ -4,6 +4,7 @@ import {
   JobSeekerDetails,
   JobSeekerUpdateForm,
 } from "../domains/jobseeker.domain";
+import { ApplicationInfo } from "../domains/application.domain";
 
 export async function fetchJobSeekerProfile() {
   return (await client.get("/jobseeker")).data;
@@ -25,4 +26,18 @@ export async function uploadJobSeekerProfilePicture(
   });
 
   return response.data; // this is the image URL returned by your backend
+}
+
+export async function fetchApplicationInfo(
+  applicationId: number
+): Promise<ApplicationInfo> {
+  const response = await client.get<ApplicationInfo>(
+    `/jobseeker/application/${applicationId}`
+  );
+  return response.data;
+}
+
+export async function fetchAllApplications(): Promise<ApplicationInfo[]> {
+  const response = await client.get<ApplicationInfo[]>("/jobseeker/all");
+  return response.data;
 }
