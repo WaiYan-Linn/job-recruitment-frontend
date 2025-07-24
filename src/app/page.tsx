@@ -150,7 +150,7 @@ const App = () => {
         const res = await fetchJobs(0, 6); // Get the first page, size 6
         const jobs = Array.isArray(res?.contents) ? res.contents : [];
 
-        const companiesRes = await fetchAllCompanies(0, 10);
+        const companiesRes = await fetchAllCompanies("", 0, 10);
         const companies = Array.isArray(companiesRes?.contents)
           ? companiesRes.contents
           : [];
@@ -321,6 +321,11 @@ const App = () => {
                 whileHover={{ scale: 1.03 }}
                 transition={{ type: "spring", stiffness: 300 }}
                 className="group bg-white dark:bg-gray-700 rounded-2xl border border-transparent hover:border-blue-400 shadow-md hover:shadow-xl overflow-hidden cursor-pointer transition-all"
+                onClick={() => {
+                  const query = new URLSearchParams();
+                  query.append("specialization", category.name);
+                  router.push(`/jobs?${query.toString()}`);
+                }}
               >
                 <div
                   className={`h-32 flex items-center justify-center bg-gradient-to-br ${category.color} group-hover:opacity-90 transition-opacity`}

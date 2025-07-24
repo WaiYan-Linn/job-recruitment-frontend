@@ -318,7 +318,7 @@ export default function CandidateDetailPage() {
           <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Interview Details{" "}
+              Interview Details
               <span className="text-sm text-gray-200">(Scheduled)</span>
             </CardTitle>
           </CardHeader>

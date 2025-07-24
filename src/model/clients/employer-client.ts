@@ -10,8 +10,13 @@ export async function fetchEmployerProfile(): Promise<EmployerProfile> {
   return (await client.get("/employer/profile/about")).data;
 }
 
-export async function fetchAllCompanies(page: number = 0, size: number = 10) {
-  return (await client.get("/employer/all", { params: { page, size } })).data;
+export async function fetchAllCompanies(
+  name?: string,
+  page: number = 0,
+  size: number = 10
+) {
+  return (await client.get("/employer/all", { params: { name, page, size } }))
+    .data;
 }
 
 export async function updateEmployerProfile(form: UpdateEmployerRequest) {

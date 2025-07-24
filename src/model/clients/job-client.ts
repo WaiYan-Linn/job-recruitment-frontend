@@ -27,7 +27,7 @@ export async function fetchJobsById(id: number) {
 
 export async function fetchJobWithParams({
   page = 0,
-  size = 10,
+  size = 50,
   keyword,
   location,
   specialization,
