@@ -165,44 +165,7 @@ export default function JobseekerProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Applications Section */}
-      <Card className="rounded-2xl shadow-sm border border-gray-200">
-        <CardHeader>
-          <h2 className="text-2xl font-semibold text-gray-800">Applications</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {profile.applications.map((app: ApplicationSummary) => (
-            <div
-              key={app.id}
-              className="flex flex-col md:flex-row md:items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-200 hover:shadow-md transition"
-            >
-              <div className="space-y-1">
-                <h3 className="text-lg font-medium text-gray-800">
-                  {app.jobTitle}
-                </h3>
-                <p className="text-sm text-gray-600">{app.companyName}</p>
-                <p className="text-xs text-gray-400">
-                  Applied on {new Date(app.appliedDate).toLocaleDateString()}
-                </p>
-              </div>
-              <div>
-                <Badge
-                  className={`mt-2 md:mt-0 px-4 py-1 rounded-full text-sm font-semibold 
-                    ${
-                      app.status === "Accepted"
-                        ? "bg-green-100 text-green-800"
-                        : app.status === "Rejected"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                >
-                  {app.status}
-                </Badge>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+  
     </div>
   );
 }

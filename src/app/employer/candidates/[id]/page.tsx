@@ -312,56 +312,60 @@ export default function CandidateDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Interview Details Card - Shown if interviewDetails data exists */}
-      {interviewDetails && (
-        <Card className="shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Interview Details
-              <span className="text-sm text-gray-200">(Scheduled)</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-start gap-3">
-              <Calendar className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm text-gray-500">Date & Time</p>
-                <p className="font-medium text-gray-800">
-                  {new Date(interviewDetails.dateTime).toLocaleString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm text-gray-500">Location</p>
-                <p className="font-medium text-gray-800">
-                  {interviewDetails.location}
-                </p>
-              </div>
-            </div>
-            {interviewDetails.notes && (
+      {/* Interview Details Card - Only shown if dateTime and location are non-empty */}
+      {interviewDetails?.dateTime?.trim() &&
+        interviewDetails.location?.trim() && (
+          <Card className="shadow-lg border-0">
+            <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-lg">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Interview Details
+                <span className="text-sm text-gray-200">(Scheduled)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
               <div className="flex items-start gap-3">
-                <StickyNote className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                <Calendar className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-gray-500">Notes</p>
-                  <p className="font-medium text-gray-800 whitespace-pre-wrap">
-                    {interviewDetails.notes}
+                  <p className="text-sm text-gray-500">Date & Time</p>
+                  <p className="font-medium text-gray-800">
+                    {new Date(interviewDetails.dateTime).toLocaleString(
+                      "en-US",
+                      {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
                   </p>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="font-medium text-gray-800">
+                    {interviewDetails.location}
+                  </p>
+                </div>
+              </div>
+              {interviewDetails.notes?.trim() && (
+                <div className="flex items-start gap-3">
+                  <StickyNote className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">Notes</p>
+                    <p className="font-medium text-gray-800 whitespace-pre-wrap">
+                      {interviewDetails.notes}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
       {/* Profile & Skills Card */}
       <Card className="shadow-lg border-0">

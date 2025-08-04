@@ -36,6 +36,7 @@ import {
   getApplicationsByStatus,
   previewResume,
 } from "@/model/clients/application-client";
+import { fetchJobsByEmployer } from "@/model/clients/job-client";
 
 export default function GlobalCandidatesPage() {
   const [candidates, setCandidates] = useState<EmployerCandidateViewDto[]>([]);
@@ -53,13 +54,25 @@ export default function GlobalCandidatesPage() {
   const token = useAccessToken((s) => s.accessToken);
   const router = useRouter();
 
-  const extractJobOptions = (data: EmployerCandidateViewDto[]): JobOption[] => {
-    const unique = new Map<number, string>();
-    data.forEach((c) => unique.set(c.jobId, c.jobTitle));
-    return Array.from(unique.entries())
-      .map(([id, title]) => ({ id, title }))
-      .sort((a, b) => a.title.localeCompare(b.title));
-  };
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchJobs = async () => {
+      try {
+        const data = await fetchJobsByEmployer(0, 100);
+        const jobs: JobOption[] = data.contents.map((job: any) => ({
+          id: job.id,
+          title: job.title,
+        }));
+        setJobOptions(jobs);
+      } catch (error) {
+        console.error("Failed to fetch jobs by employer:", error);
+        setJobOptions([]);
+      }
+    };
+
+    fetchJobs();
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -88,9 +101,6 @@ export default function GlobalCandidatesPage() {
         }
 
         setCandidates(data);
-        if (jobFilter === "all" && statusFilter === "all") {
-          setJobOptions(extractJobOptions(data));
-        }
       } catch (err) {
         console.error("Error loading candidates:", err);
         setCandidates([]);

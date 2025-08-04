@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { fetchAllCompanies } from "@/model/clients/employer-client";
-import { useRouter } from "next/navigation";
 
 interface CompanyDetails {
   id: string;
@@ -18,7 +17,6 @@ const CompaniesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchName, setSearchName] = useState("");
-  const router = useRouter();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +28,7 @@ const CompaniesPage = () => {
       const res = await fetchAllCompanies(name, 0, 50);
       const contents = Array.isArray(res?.contents) ? res.contents : [];
       setCompanies(contents);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Failed to fetch companies.");
       setCompanies([]);
@@ -45,6 +44,7 @@ const CompaniesPage = () => {
         const res = await fetchAllCompanies("", 0, 50);
         const contents = Array.isArray(res?.contents) ? res.contents : [];
         setCompanies(contents);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError("Failed to fetch companies.");
         setCompanies([]);
@@ -76,8 +76,7 @@ const CompaniesPage = () => {
             Search
           </button>
           <button
-            type="button"
-            className="px-4 py-3 rounded-lg font-semibold border border-gray-300 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+            className="px-6 py-3 rounded-lg font-semibold border border-gray-300 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
             onClick={async () => {
               setSearchName("");
               setLoading(true);
@@ -88,6 +87,7 @@ const CompaniesPage = () => {
                   ? res.contents
                   : [];
                 setCompanies(contents);
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               } catch (err) {
                 setError("Failed to fetch companies.");
                 setCompanies([]);
@@ -96,7 +96,7 @@ const CompaniesPage = () => {
               }
             }}
           >
-            Clear Filters
+            Clear 
           </button>
         </div>
       </form>
